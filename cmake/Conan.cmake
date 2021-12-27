@@ -15,7 +15,7 @@ if(${PROJECT_NAME}_ENABLE_CONAN)
       "Downloading conan.cmake from https://github.com/conan-io/cmake-conan..."
     )
     file(
-      DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.16.1/conan.cmake"
+      DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/release/0.17/conan.cmake"
       "${CMAKE_BINARY_DIR}/conan.cmake"
     )
     message(STATUS "Cmake-Conan downloaded succesfully.")
@@ -39,22 +39,22 @@ if(${PROJECT_NAME}_ENABLE_CONAN)
   #  BUILD
   #  missing
   #)
-  conan_cmake_configure(REQUIRES gtest/1.8.1
-                      GENERATORS cmake
-                      BUILD_REQUIRES cmake/3.15.7
-                      IMPORTS "bin, *.dll -> ./bin"
-                      IMPORTS "lib, *.dylib* -> ./bin"
-                      OPTIONS gtest:shared=True gtest:build_gmock=True gtest:debug_postfix=d gtest:hide_symbols=False)
+  conan_cmake_configure(
+          REQUIRES gtest/1.10.0 nlohmann_json/3.10.4
+          GENERATORS cmake_paths cmake_find_package
+          BUILD_REQUIRES cmake/3.15.7
+          IMPORTS "bin, *.dll -> ./bin"
+          IMPORTS "lib, *.dylib* -> ./bin"
+          OPTIONS gtest:shared=True gtest:build_gmock=True gtest:hide_symbols=False)
 
-  conan_cmake_autodetect(settings)
+  conan_cmake_autodetect(settings BUILD_TYPE Release)
 
   conan_cmake_install(PATH_OR_REFERENCE .
                     BUILD missing
                     REMOTE conancenter
                     SETTINGS ${settings})
 
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  conan_basic_setup()
+  include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
   verbose_message("Conan is setup and all requires have been installed.")
 endif()

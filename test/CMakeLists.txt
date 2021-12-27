@@ -43,24 +43,19 @@ foreach(file ${test_sources})
   endif()
 
   if(${CMAKE_PROJECT_NAME}_USE_GTEST)
-    #find_package(GTest REQUIRED)
+    find_package(GTest 1.10.0 REQUIRED)
 
     if(${CMAKE_PROJECT_NAME}_USE_GOOGLE_MOCK)
       set(GOOGLE_MOCK_LIBRARIES GTest::gmock GTest::gmock_main)
     endif()
 
-    #target_link_libraries(
-    #  ${test_name}_Tests
-    #  PUBLIC
-    #    GTest::GTest
-    #    GTest::Main
-    #    ${GOOGLE_MOCK_LIBRARIES}
-    #    ${${CMAKE_PROJECT_NAME}_TEST_LIB}
-    #)
     target_link_libraries(
       ${test_name}_Tests
       PUBLIC
-        ${CONAN_LIBS} Settlers
+        GTest::gtest_main
+        GTest::gmock
+        ${GOOGLE_MOCK_LIBRARIES}
+        ${${CMAKE_PROJECT_NAME}_TEST_LIB}
     )
   elseif(${CMAKE_PROJECT_NAME}_USE_CATCH2)
     find_package(Catch2 REQUIRED)
