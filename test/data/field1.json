@@ -1,10 +1,21 @@
 {
-  "types": [
-    "coast",
-    "mountain",
-    "forest",
-    "desert",
-    "meadow"
+  "pool": [
+    {
+      "type": "mountain",
+      "amount": 0
+    },
+    {
+      "type": "forest",
+      "amount": 0
+    },
+    {
+      "type": "meadow",
+      "amount": 0
+    },
+    {
+      "type": "desert",
+      "amount": 1
+    }
   ],
   "triggers": [
     {
@@ -28,7 +39,8 @@
   "tiles": [
     {
       "q": 0,
-      "r": 0
+      "r": 0,
+      "type": "desert"
     },
     {
       "q": 1,
