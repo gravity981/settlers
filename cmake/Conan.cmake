@@ -40,12 +40,15 @@ if(${PROJECT_NAME}_ENABLE_CONAN)
   #  missing
   #)
   conan_cmake_configure(
-          REQUIRES gtest/1.10.0 nlohmann_json/3.10.4
+          REQUIRES gtest/1.10.0 nlohmann_json/3.10.4 spdlog/1.9.2
           GENERATORS cmake_paths cmake_find_package
           BUILD_REQUIRES cmake/3.15.7
           IMPORTS "bin, *.dll -> ./bin"
           IMPORTS "lib, *.dylib* -> ./bin"
-          OPTIONS gtest:shared=True gtest:build_gmock=True gtest:hide_symbols=False)
+          OPTIONS
+            gtest:shared=True gtest:build_gmock=True gtest:hide_symbols=False
+            spdlog:shared=True spdlog:header_only=True spdlog:no_exceptions=True
+  )
 
   conan_cmake_autodetect(settings BUILD_TYPE Release)
 

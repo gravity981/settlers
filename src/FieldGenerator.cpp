@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 FieldGenerator::FieldGenerator()
 {
@@ -29,6 +30,7 @@ bool FieldGenerator::generateFromFile(const std::string& filePath)
   catch (nlohmann::json::parse_error& ex)
   {
     std::cerr << "parse error at byte " << ex.byte << std::endl;
+    SPDLOG_INFO("some message");
   }
   ifs.close();
   if (success)

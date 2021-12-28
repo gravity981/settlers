@@ -55,14 +55,6 @@ endif()
 include(cmake/Conan.cmake)
 include(cmake/Vcpkg.cmake)
 
-#find_package(GTest REQUIRED)
-
-if(TARGET GTest::GTest)
-	message(STATUS "gtest found")
-endif()
-
-
-
 #
 # Create library, setup header and source files
 #
@@ -167,10 +159,12 @@ include(cmake/Doxygen.cmake)
 
 # Identify and link with the specific "packages" the project uses
 find_package(nlohmann_json 3.10.4 REQUIRED)
+find_package(spdlog 1.9.2 REQUIRED)
 target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC
         nlohmann_json::nlohmann_json
+        spdlog::spdlog
 #  PRIVATE
 #    dependency2 ...
 #    ${PROJECT_NAME}_PROJECT_OPTIONS
