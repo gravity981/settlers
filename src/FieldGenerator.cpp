@@ -1,8 +1,7 @@
 #include "settlers/FieldGenerator.h"
 
 #include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include <spdlog/spdlog.h>
 
 FieldGenerator::FieldGenerator()
@@ -12,15 +11,30 @@ FieldGenerator::FieldGenerator()
 FieldGenerator::~FieldGenerator()
 {
 }
+
 bool FieldGenerator::generateFromFile(const std::string& filePath)
+{
+  nlohmann::json jsonData;
+  if(!readFile(filePath, jsonData))
+  {
+    return false;
+  }
+  if(!generateTiles(jsonData))
+  {
+    return false;
+  }
+  return true;
+}
+
+bool FieldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
 {
   std::ifstream ifs;
   ifs.open(filePath, std::ifstream::in);
   if (ifs.fail())
   {
+    SPDLOG_ERROR("failed to open file '{}'", filePath);
     return false;
   }
-  nlohmann::json jsonData;
   bool success = false;
   try
   {
@@ -29,13 +43,30 @@ bool FieldGenerator::generateFromFile(const std::string& filePath)
   }
   catch (nlohmann::json::parse_error& ex)
   {
-    std::cerr << "parse error at byte " << ex.byte << std::endl;
-    SPDLOG_INFO("some message");
+    SPDLOG_ERROR("parse error at byte {}", ex.byte);
   }
   ifs.close();
   if (success)
   {
-    std::cout << jsonData.dump(4) << std::endl;
+    SPDLOG_DEBUG("parsed data '{}'", jsonData.dump(4));
   }
   return success;
+}
+bool FieldGenerator::generateTiles(nlohmann::json jsonData)
+{
+  try
+  {
+    for (auto& obj : jsonData["tiles"].items())
+    {
+      //SPDLOG_INFO("tile q:{}, r:{}", obj["q"], obj["r"]);
+      //SPDLOG_INFO("tile {}", obj.value()["q"]);
+      SPDLOG_INFO("tile");
+    }
+  }
+  catch(nlohmann::json::type_error& ex)
+  {
+    SPDLOG_ERROR("type error: {}", ex.what());
+    return false;
+  }
+  return true;
 }

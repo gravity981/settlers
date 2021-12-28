@@ -1,1 +1,58 @@
-{}
+{
+  "types": [
+    "coast",
+    "mountain",
+    "forest",
+    "desert",
+    "meadow"
+  ],
+  "triggers": [
+    {
+      "value": 2,
+      "amount": 1
+    },
+    {
+      "value": 8,
+      "amount": 2
+    },
+    {
+      "value": 7,
+      "effect": "raid"
+    }
+  ],
+  "randomizer": {
+    "summands": 2,
+    "min": 1,
+    "max": 6
+  },
+  "tiles": [
+    {
+      "q": 0,
+      "r": 0
+    },
+    {
+      "q": 1,
+      "r": 0
+    },
+    {
+      "q": 0,
+      "r": 1
+    },
+    {
+      "q": 1,
+      "r": 1
+    },
+    {
+      "q": -1,
+      "r": -1
+    },
+    {
+      "q": -1,
+      "r": 0
+    },
+    {
+      "q": 0,
+      "r": -1
+    }
+  ]
+}

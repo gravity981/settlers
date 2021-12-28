@@ -1,6 +1,7 @@
 set(sources
 		src/tmp.cpp
 		src/FieldGenerator.cpp
+		src/Tile.cpp
 )
 
 set(exe_sources
@@ -11,6 +12,7 @@ set(exe_sources
 set(headers
 		include/settlers/tmp.hpp
 		include/settlers/FieldGenerator.h
+		include/settlers/Tile.h
 )
 
 set(test_sources
