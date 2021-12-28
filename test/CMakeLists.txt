@@ -13,13 +13,13 @@ verbose_message("Adding tests under ${CMAKE_PROJECT_NAME}Tests...")
 
 foreach(file ${test_sources})
   string(REGEX REPLACE "(.*/)([a-zA-Z0-9_ ]+)(\.cpp)" "\\2" test_name ${file}) 
-  add_executable(${test_name}_Tests ${file})
+  add_executable(${test_name} ${file})
 
   #
   # Set the compiler standard
   #
 
-  target_compile_features(${test_name}_Tests PUBLIC cxx_std_17)
+  target_compile_features(${test_name} PUBLIC cxx_std_17)
 
   #
   # Setup code coverage if enabled
@@ -50,7 +50,7 @@ foreach(file ${test_sources})
     endif()
 
     target_link_libraries(
-      ${test_name}_Tests
+      ${test_name}
       PUBLIC
         GTest::gtest_main
         GTest::gmock
@@ -77,8 +77,18 @@ foreach(file ${test_sources})
     NAME
       ${test_name}
     COMMAND
-      ${test_name}_Tests
+      ${test_name}
   )
+endforeach()
+
+file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/data/*")
+foreach(file ${files})
+  message(STATUS "configure test data file '${file}'")
+  get_filename_component(barename ${file} NAME)
+  set(output_path ${CMAKE_BINARY_DIR}/test/data/${barename})
+  message(STATUS "copy to '${output_path}'")
+  configure_file(${file} ${output_path} COPYONLY)
+
 endforeach()
 
 verbose_message("Finished adding unit tests for ${CMAKE_PROJECT_NAME}.")

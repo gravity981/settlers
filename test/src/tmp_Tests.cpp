@@ -1,4 +1,4 @@
-#include "../../include/settlers/tmp.hpp"
+#include "settlers/tmp.hpp"
 
 #include <gtest/gtest.h>
 
