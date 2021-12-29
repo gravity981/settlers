@@ -1,37 +1,39 @@
-#include "settlers/FieldGenerator.h"
+#include "settlers/WorldGenerator.h"
 
-#include <fstream>
 #include <cstdlib>
+#include <fstream>
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include <spdlog/spdlog.h>
+#include <random>
 
-FieldGenerator::FieldGenerator()
+WorldGenerator::WorldGenerator()
 {
 }
 
-FieldGenerator::~FieldGenerator()
+WorldGenerator::~WorldGenerator()
 {
 }
 
-bool FieldGenerator::generateFromFile(const std::string& filePath)
+bool WorldGenerator::generateFromFile(const std::string& filePath)
 {
   m_jsonData.clear();
-  if(!readFile(filePath, m_jsonData))
+  if (!readFile(filePath, m_jsonData))
   {
     return false;
   }
-  if(!generateTiles(m_jsonData))
+  if (!generateTiles(m_jsonData))
   {
     return false;
   }
-  if(!calculateTileTypes())
+  generateCornersAndEdges();
+  if (!calculateTileTypes())
   {
     return false;
   }
   return true;
 }
 
-bool FieldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
+bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
 {
   std::ifstream ifs;
   ifs.open(filePath, std::ifstream::in);
@@ -57,19 +59,19 @@ bool FieldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonD
   }
   return success;
 }
-bool FieldGenerator::generateTiles(nlohmann::json jsonData)
+bool WorldGenerator::generateTiles(nlohmann::json jsonData)
 {
   bool success = true;
   try
   {
     for (auto& obj : jsonData["tiles"])
     {
-      auto q= obj["q"].get<int>();
+      auto q = obj["q"].get<int>();
       auto r = obj["r"].get<int>();
       auto type = obj.value("type", "");
-      Tile tile{q, r};
+      Tile tile{ q, r };
       tile.setType(Tile::typeFromString(type));
-      if(m_tileMap.find(tile.id()) == m_tileMap.end())
+      if (m_tileMap.find(tile.id()) == m_tileMap.end())
       {
         m_tileMap.insert(std::make_pair(tile.id(), tile));
       }
@@ -80,45 +82,45 @@ bool FieldGenerator::generateTiles(nlohmann::json jsonData)
       }
     }
   }
-  catch(nlohmann::json::type_error& ex)
+  catch (nlohmann::json::type_error& ex)
   {
     SPDLOG_ERROR("{}", ex.what());
     return false;
   }
-  if(success)
+  if (success)
   {
     SPDLOG_INFO("generated tiles");
   }
   return success;
 }
-bool FieldGenerator::calculateTileTypes()
+bool WorldGenerator::calculateTileTypes()
 {
   calculateCoastTiles();
   return calculateLandTiles();
 }
-void FieldGenerator::calculateCoastTiles()
+void WorldGenerator::calculateCoastTiles()
 {
-  for(auto& [id, tile] : m_tileMap)
+  for (auto& [id, tile] : m_tileMap)
   {
     bool allNeighborsExist = true;
-    for(const auto& neighborTile : tile.getNeighbors())
+    for (const auto& neighborTile : tile.getAllPossibleNeighbors())
     {
-      if(m_tileMap.find(neighborTile.id()) == m_tileMap.end())
+      if (m_tileMap.find(neighborTile.id()) == m_tileMap.end())
       {
         allNeighborsExist = false;
         break;
       }
     }
-    //all tiles which are at the border of the grid are considered coast.
-    if(!allNeighborsExist && tile.getType() == Tile::TYPE_UNDEFINED)
+    // all tiles which are at the border of the grid are considered coast.
+    if (!allNeighborsExist && tile.getType() == Tile::TYPE_UNDEFINED)
     {
       tile.setType(Tile::TYPE_COAST);
     }
   }
 }
-bool FieldGenerator::calculateLandTiles()
+bool WorldGenerator::calculateLandTiles()
 {
-  //create typePool;
+  // create typePool;
   std::vector<Tile::EType> typePool;
   try
   {
@@ -132,45 +134,63 @@ bool FieldGenerator::calculateLandTiles()
       }
     }
   }
-  catch(nlohmann::json::type_error& ex)
+  catch (nlohmann::json::type_error& ex)
   {
     SPDLOG_ERROR("{}", ex.what());
     return false;
   }
   SPDLOG_INFO("raw typePool size: {}", typePool.size());
 
-  //remove already assigned from tilePool
-  for(auto& [id, tile] : m_tileMap)
+  // remove already assigned from tilePool
+  for (auto& [id, tile] : m_tileMap)
   {
     auto it = std::find(typePool.begin(), typePool.end(), tile.getType());
-    if(it != typePool.end())
+    if (it != typePool.end())
     {
       typePool.erase(it);
     }
   }
   SPDLOG_INFO("typePool size after cleaning: {}", typePool.size());
 
-  //randomly assign tile types to still undefined tiles
+  // randomly assign tile types to still undefined tiles
   bool typePoolStarved = false;
-  for(auto& [id, tile] : m_tileMap)
+  // Seed with a real random value, if available
+  std::random_device randomDevice;
+
+  // Choose a random mean between 1 and 6
+  std::default_random_engine randomEngine(randomDevice());
+  for (auto& [id, tile] : m_tileMap)
   {
-    if(tile.getType() == Tile::TYPE_UNDEFINED)
+    if (tile.getType() == Tile::TYPE_UNDEFINED)
     {
-      if(typePool.empty())
+      if (typePool.empty())
       {
         typePoolStarved = true;
         break;
       }
-      auto randomIndex = std::rand() % typePool.size();
+      std::uniform_int_distribution<size_t> uniform_dist(0, typePool.size());
+      auto randomIndex = uniform_dist(randomEngine);
       tile.setType(typePool.at(randomIndex));
-      typePool.erase(typePool.begin() + randomIndex);
+      typePool.erase(std::next(typePool.begin(), static_cast<long>(randomIndex)));
     }
   }
   SPDLOG_INFO("typePool size after assigning remaining tiles: {}", typePool.size());
-  if(!typePool.empty() || typePoolStarved)
+  if (!typePool.empty() || typePoolStarved)
   {
     SPDLOG_ERROR("mismatch between amount of existing tiles and typePool size");
     return false;
   }
   return true;
+}
+void WorldGenerator::generateCornersAndEdges()
+{
+  for (auto& [id, tile] : m_tileMap)
+  {
+    // todo
+    // get existing neighbors
+    // loop through each neighbor
+    // check if corners and edge exist for that neighbor
+    // create corners and edge if not exist
+    // link elements together
+  }
 }

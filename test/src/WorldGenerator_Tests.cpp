@@ -1,30 +1,30 @@
-#include "settlers/FieldGenerator.h"
+#include "settlers/WorldGenerator.h"
 
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 
 
-TEST(FieldGeneratorTest, generateFromInexistentFileShouldFail)
+TEST(WorldGeneratorTest, generateFromInexistentFileShouldFail)
 {
-  FieldGenerator fg;
+  WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("don't exist"));
 }
 
-TEST(FieldGeneratorTest, generateFromInvalidFileShouldFail)
+TEST(WorldGeneratorTest, generateFromInvalidFileShouldFail)
 {
-  FieldGenerator fg;
+  WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("data/field_invalidJson.json"));
 }
 
-TEST(FieldGeneratorTest, generateFromEmptyFileShouldFail)
+TEST(WorldGeneratorTest, generateFromEmptyFileShouldFail)
 {
-  FieldGenerator fg;
+  WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("data/field_emptyFile.json"));
 }
 
-TEST(FieldGeneratorTest, generateFromExistingFileShouldWork)
+TEST(WorldGeneratorTest, generateFromExistingFileShouldWork)
 {
-  FieldGenerator fg;
+  WorldGenerator fg;
   EXPECT_TRUE(fg.generateFromFile("data/field1.json"));
 }
 

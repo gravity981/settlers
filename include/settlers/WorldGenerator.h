@@ -1,17 +1,22 @@
 #pragma once
 
+#include "Tile.h"
+#include "Corner.h"
+#include "Edge.h"
+
 #include <nlohmann/json.hpp>
 #include <string>
-#include "Tile.h"
 
-class FieldGenerator
+class WorldGenerator
 {
  private:
   nlohmann::json m_jsonData;
   std::map<int, Tile> m_tileMap;
+  std::map<int, Corner> m_cornerMap;
+  std::map<int, Edge> m_edgeMap;
  public:
-  explicit FieldGenerator();
-  virtual ~FieldGenerator();
+  explicit WorldGenerator();
+  virtual ~WorldGenerator();
 
   bool generateFromFile(const std::string& filePath);
 
@@ -21,4 +26,5 @@ class FieldGenerator
   bool calculateTileTypes();
   void calculateCoastTiles();
   bool calculateLandTiles();
+  void generateCornersAndEdges();
 };

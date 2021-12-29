@@ -74,7 +74,7 @@ Tile::EType Tile::typeFromString(const std::string& typeStr)
   }
   return TYPE_UNDEFINED;
 }
-std::vector<Tile> Tile::getNeighbors() const
+std::vector<Tile> Tile::getAllPossibleNeighbors() const
 {
   // a tile has 6 neighbors
   std::vector<Tile> neighbors{
