@@ -90,6 +90,18 @@ bool WorldGenerator::generateTiles(nlohmann::json jsonData)
   if (success)
   {
     SPDLOG_INFO("generated tiles");
+    //link neighbor tiles together
+    for(auto& [id, tile] : m_tileMap)
+    {
+      auto possibleNeighbors = tile.getAllPossibleNeighbors();
+      for(const auto& possibleNeighbor : possibleNeighbors)
+      {
+        if(m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end())
+        {
+          tile.addNeighbor(m_tileMap.at(possibleNeighbor.id()));
+        }
+      }
+    }
   }
   return success;
 }
@@ -102,17 +114,8 @@ void WorldGenerator::calculateCoastTiles()
 {
   for (auto& [id, tile] : m_tileMap)
   {
-    bool allNeighborsExist = true;
-    for (const auto& neighborTile : tile.getAllPossibleNeighbors())
-    {
-      if (m_tileMap.find(neighborTile.id()) == m_tileMap.end())
-      {
-        allNeighborsExist = false;
-        break;
-      }
-    }
     // all tiles which are at the border of the grid are considered coast.
-    if (!allNeighborsExist && tile.getType() == Tile::TYPE_UNDEFINED)
+    if (!tile.allNeighborsExist() && tile.getType() == Tile::TYPE_UNDEFINED)
     {
       tile.setType(Tile::TYPE_COAST);
     }
@@ -184,13 +187,46 @@ bool WorldGenerator::calculateLandTiles()
 }
 void WorldGenerator::generateCornersAndEdges()
 {
+  //todo this is buggy, fix it
+
+  // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
   {
-    // todo
-    // get existing neighbors
-    // loop through each neighbor
-    // check if corners and edge exist for that neighbor
-    // create corners and edge if not exist
-    // link elements together
+    auto& neighbors = tile.getNeighbors();
+    // loop through each neighbors
+    for(auto& neighbor : neighbors)
+    {
+      const auto& neighborCorners = neighbor.get().getAllPossibleCorners();
+      auto possibleCorners = tile.getAllPossibleCorners();
+      auto intersectingCorners = Corner::getIntersectingCorners(possibleCorners, neighborCorners);
+      // loop through intersecting corners
+      for(auto& intersectingCorner : intersectingCorners)
+      {
+        // corners are created only at intersections
+        // create corners if not exist
+        if (m_cornerMap.find(intersectingCorner.id()) == m_cornerMap.end())
+        {
+          m_cornerMap.insert(std::make_pair(intersectingCorner.id(), intersectingCorner));
+        }
+        // todo create edge
+        // link elements together
+        const auto& tileCorners = tile.getCorners();
+        if(tileCorners.empty())
+        {
+          tile.addCorner(m_cornerMap.at(intersectingCorner.id()));
+        }
+        else
+        {
+          for (const auto& tileCorner : tileCorners)
+          {
+            // only link corner to tile if it is not already linked
+            if (tileCorner.get().id() != intersectingCorner.id())
+            {
+              tile.addCorner(m_cornerMap.at(intersectingCorner.id()));
+            }
+          }
+        }
+      }
+    }
   }
 }

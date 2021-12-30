@@ -22,6 +22,7 @@ class Tile
   const int m_q;
   const int m_r;
   std::vector<std::reference_wrapper<Corner>> m_corners;
+  std::vector<std::reference_wrapper<Tile>> m_neighbors;
 
   EType m_type{TYPE_UNDEFINED};
   int m_triggerValue{0};
@@ -39,10 +40,17 @@ class Tile
   EType getType() const;
   int getTriggerValue() const;
   std::vector<Tile> getAllPossibleNeighbors() const;
-  std::vector<Corner> getAllCorners() const;
+  std::vector<Corner> getAllPossibleCorners() const;
 
   void setType(EType type);
   void setTriggerValue(int value);
+
+  const std::vector<std::reference_wrapper<Tile>> getNeighbors() const;
+  const std::vector<std::reference_wrapper<Corner>> getCorners() const;
+
+  void addNeighbor(Tile& tile);
+  void addCorner(Corner& corner);
+  bool allNeighborsExist() const;
 
   static EType typeFromString(const std::string& typeStr);
 };

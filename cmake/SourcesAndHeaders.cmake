@@ -22,4 +22,5 @@ set(headers
 set(test_sources
 		src/tmp_Tests.cpp
 		src/WorldGenerator_Tests.cpp
+		src/Corner_Tests.cpp
 )

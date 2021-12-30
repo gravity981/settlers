@@ -8,6 +8,8 @@
 
 class Corner
 {
+ public:
+  static const int MAX = 1000;
  private:
   const double m_q;
   const double m_r;
@@ -19,6 +21,9 @@ class Corner
   virtual ~Corner();
 
   bool operator==(const Corner& corner) const;
+  double q() const;
+  double r() const;
+  int id() const;
 
   static std::vector<Corner> getIntersectingCorners(const std::vector<Corner>& cornersA,const std::vector<Corner>& cornersB);
 };
