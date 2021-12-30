@@ -1,5 +1,7 @@
 #include "settlers/Tile.h"
 
+#include "settlers/Corner.h"
+
 Tile::Tile(int q, int r) : m_q{ q }, m_r{ r }
 {
 }
@@ -52,23 +54,23 @@ int Tile::getTriggerValue() const
 }
 Tile::EType Tile::typeFromString(const std::string& typeStr)
 {
-  if(typeStr == "desert")
+  if (typeStr == "desert")
   {
     return TYPE_DESERT;
   }
-  if(typeStr == "coast")
+  if (typeStr == "coast")
   {
     return TYPE_COAST;
   }
-  if(typeStr == "mountain")
+  if (typeStr == "mountain")
   {
     return TYPE_MOUNTAIN;
   }
-  if(typeStr == "meadow")
+  if (typeStr == "meadow")
   {
     return TYPE_MEADOW;
   }
-  if(typeStr == "forest")
+  if (typeStr == "forest")
   {
     return TYPE_FOREST;
   }
@@ -77,13 +79,25 @@ Tile::EType Tile::typeFromString(const std::string& typeStr)
 std::vector<Tile> Tile::getAllPossibleNeighbors() const
 {
   // a tile has 6 neighbors
-  std::vector<Tile> neighbors{
-    {m_q+1,m_r},
-    {m_q,m_r+1},
-    {m_q+1,m_r+1},
-    {m_q-1,m_r},
-    {m_q,m_r-1},
-    {m_q-1,m_r-1},
-  };
-  return neighbors;
+  return {
+        { m_q + 1, m_r },
+        { m_q, m_r + 1 },
+        { m_q + 1, m_r + 1 },
+        { m_q - 1, m_r },
+        { m_q, m_r - 1 },
+        { m_q - 1, m_r - 1 },
+      };
+}
+std::vector<Corner> Tile::getAllCorners() const
+{
+  auto q = static_cast<double>(m_q);
+  auto r = static_cast<double>(m_r);
+  // a tile has 6 corners
+  return {
+    { q + 0.5, r - 2.0 / 3.0 },
+    { q + 0.5, r - 1.0 / 3.0 },
+    { q, r + 1.0 / 3.0 },
+    { q - 0.5, r + 2.0 / 3.0 },
+    { q - 0.5, r + 1.0 / 3.0 },
+    { q, r - 1.0 / 3.0 } };
 }

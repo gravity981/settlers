@@ -39,6 +39,7 @@ class Tile
   EType getType() const;
   int getTriggerValue() const;
   std::vector<Tile> getAllPossibleNeighbors() const;
+  std::vector<Corner> getAllCorners() const;
 
   void setType(EType type);
   void setTriggerValue(int value);
