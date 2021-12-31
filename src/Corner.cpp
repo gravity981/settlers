@@ -1,7 +1,6 @@
 #include "settlers/Corner.h"
 
 #include <spdlog/spdlog.h>
-
 #include <cmath>
 
 Corner::Corner(double q, double r) : m_q(q), m_r(r)

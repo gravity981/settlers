@@ -1,10 +1,9 @@
 #include "settlers/Edge.h"
+#include "settlers/Corner.h"
 
 #include <spdlog/spdlog.h>
-
 #include <cmath>
 
-#include "settlers/Corner.h"
 
 Edge::Edge()
 {
@@ -36,7 +35,7 @@ int Edge::id(std::vector<Corner>& corners)
 {
   if (corners.empty())
   {
-    SPDLOG_ERROR("no corners, cannot calulate edge id");
+    SPDLOG_ERROR("no corners, cannot calculate edge id");
     return 0;
   }
   double q{ 0 }, r{ 0 };
@@ -45,8 +44,8 @@ int Edge::id(std::vector<Corner>& corners)
     q += corner.q();
     r += corner.r();
   }
-  q /= corners.size();
-  r /= corners.size();
+  q /= static_cast<double>(corners.size());
+  r /= static_cast<double>(corners.size());
   int id = static_cast<int>(round(q * 100) * 1000 * 100 + round(r * 100));
   return id;
 }

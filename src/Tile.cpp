@@ -1,7 +1,7 @@
-#include <spdlog/spdlog.h>
 #include "settlers/Tile.h"
-
 #include "settlers/Corner.h"
+
+#include <spdlog/spdlog.h>
 
 Tile::Tile(int q, int r) : m_q{ q }, m_r{ r }
 {
