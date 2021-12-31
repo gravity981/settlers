@@ -11,7 +11,7 @@ Corner::Corner(const Corner& corner) = default;
 
 Corner::~Corner() = default;
 
-std::vector<Corner> Corner::getIntersectingCorners(const std::vector<Corner>& cornersA, const std::vector<Corner>& cornersB)
+std::vector<Corner> Corner::getOverlappingCorners(const std::vector<Corner>& cornersA, const std::vector<Corner>& cornersB)
 {
   std::vector<Corner> intersectingCorners;
   for (const auto& cornerA : cornersA)
@@ -41,7 +41,7 @@ int Corner::id() const
   int q = static_cast<int>(round(m_q * 100));
   int r = static_cast<int>(round(m_r * 100));
 
-  return q * Corner::MAX + r;
+  return q * Corner::MAX*100 + r;
 }
 double Corner::q() const
 {
@@ -50,4 +50,12 @@ double Corner::q() const
 double Corner::r() const
 {
   return m_r;
+}
+void Corner::addTile(Tile& tile)
+{
+  m_tiles.emplace_back(tile);
+}
+void Corner::addEdge(Edge& edge)
+{
+  m_edges.emplace_back(edge);
 }

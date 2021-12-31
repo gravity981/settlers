@@ -3,16 +3,32 @@
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 
+class CornerParametrizedTests :public ::testing::TestWithParam<std::tuple<Corner, int>> {};
 
-TEST(CornerTest, findCorrectIntersectingCorners)
+TEST(CornerTests, findCorrectIntersectingCorners)
 {
   Tile t{0,0};
   for(const auto& n : t.getAllPossibleNeighbors())
   {
-    auto intersectingCorners = Corner::getIntersectingCorners(t.getAllPossibleCorners(), n.getAllPossibleCorners());
+    auto intersectingCorners = Corner::getOverlappingCorners(t.getAllPossibleCorners(), n.getAllPossibleCorners());
     EXPECT_EQ(intersectingCorners.size(), 2);
   }
 }
+
+TEST_P(CornerParametrizedTests, idCalculationShouldWork)
+{
+  auto c = std::get<0>(GetParam());
+  auto id = std::get<1>(GetParam());
+  EXPECT_EQ(c.id(), id);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CornerTests,
+    CornerParametrizedTests,
+    ::testing::Values(
+        std::make_tuple(Corner{0.333, 0.666}, 3300067),
+        std::make_tuple(Corner{-0.666, 0.333}, -6699967)
+        ));
 
 int main(int argc, char **argv)
 {

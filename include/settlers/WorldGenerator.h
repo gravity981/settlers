@@ -22,9 +22,11 @@ class WorldGenerator
 
  private:
   static bool readFile(const std::string& filePath, nlohmann::json& jsonData);
-  bool generateTiles(nlohmann::json jsonData);
+  bool createTiles(nlohmann::json jsonData);
   bool calculateTileTypes();
   void calculateCoastTiles();
   bool calculateLandTiles();
-  void generateCornersAndEdges();
+  void createCornersAndEdges();
+  void linkTilesAndCorners();
+  void linkCornersAndEdges();
 };

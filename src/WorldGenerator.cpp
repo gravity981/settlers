@@ -16,16 +16,22 @@ WorldGenerator::~WorldGenerator()
 
 bool WorldGenerator::generateFromFile(const std::string& filePath)
 {
+  //read file
   m_jsonData.clear();
   if (!readFile(filePath, m_jsonData))
   {
     return false;
   }
-  if (!generateTiles(m_jsonData))
+  //world related stuff
+  if (!createTiles(m_jsonData))
   {
     return false;
   }
-  generateCornersAndEdges();
+  createCornersAndEdges();
+  linkTilesAndCorners();
+  linkCornersAndEdges();
+
+  //game related stuff
   if (!calculateTileTypes())
   {
     return false;
@@ -59,7 +65,8 @@ bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonD
   }
   return success;
 }
-bool WorldGenerator::generateTiles(nlohmann::json jsonData)
+
+bool WorldGenerator::createTiles(nlohmann::json jsonData)
 {
   bool success = true;
   try
@@ -105,11 +112,13 @@ bool WorldGenerator::generateTiles(nlohmann::json jsonData)
   }
   return success;
 }
+
 bool WorldGenerator::calculateTileTypes()
 {
   calculateCoastTiles();
   return calculateLandTiles();
 }
+
 void WorldGenerator::calculateCoastTiles()
 {
   for (auto& [id, tile] : m_tileMap)
@@ -121,6 +130,7 @@ void WorldGenerator::calculateCoastTiles()
     }
   }
 }
+
 bool WorldGenerator::calculateLandTiles()
 {
   // create typePool;
@@ -185,48 +195,69 @@ bool WorldGenerator::calculateLandTiles()
   }
   return true;
 }
-void WorldGenerator::generateCornersAndEdges()
+void WorldGenerator::createCornersAndEdges()
 {
-  //todo this is buggy, fix it
-
   // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
   {
     auto& neighbors = tile.getNeighbors();
     // loop through each neighbors
+    std::vector<Corner> overlappingCorners;
     for(auto& neighbor : neighbors)
     {
       const auto& neighborCorners = neighbor.get().getAllPossibleCorners();
       auto possibleCorners = tile.getAllPossibleCorners();
-      auto intersectingCorners = Corner::getIntersectingCorners(possibleCorners, neighborCorners);
-      // loop through intersecting corners
-      for(auto& intersectingCorner : intersectingCorners)
+      overlappingCorners = Corner::getOverlappingCorners(possibleCorners, neighborCorners);
+
+      //create edge between neighbors if not exists already
+      auto edgeId = Edge::id(overlappingCorners);
+      bool isNewEdge = false;
+      if(m_edgeMap.find(edgeId) == m_edgeMap.end())
       {
-        // corners are created only at intersections
-        // create corners if not exist
-        if (m_cornerMap.find(intersectingCorner.id()) == m_cornerMap.end())
+        isNewEdge = true;
+        m_edgeMap.insert(std::make_pair(edgeId, Edge{}));
+      }
+
+      // loop through overlapping corners
+      for(auto& overlappingCorner : overlappingCorners)
+      {
+        auto cornerId = overlappingCorner.id();
+        // create corner if not exist
+        if (m_cornerMap.find(cornerId) == m_cornerMap.end())
         {
-          m_cornerMap.insert(std::make_pair(intersectingCorner.id(), intersectingCorner));
+          m_cornerMap.insert(std::make_pair(cornerId, overlappingCorner));
         }
-        // todo create edge
-        // link elements together
-        const auto& tileCorners = tile.getCorners();
-        if(tileCorners.empty())
+        //add corner to edge
+        if(isNewEdge)
         {
-          tile.addCorner(m_cornerMap.at(intersectingCorner.id()));
-        }
-        else
-        {
-          for (const auto& tileCorner : tileCorners)
-          {
-            // only link corner to tile if it is not already linked
-            if (tileCorner.get().id() != intersectingCorner.id())
-            {
-              tile.addCorner(m_cornerMap.at(intersectingCorner.id()));
-            }
-          }
+          m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(cornerId));
         }
       }
+    }
+  }
+}
+void WorldGenerator::linkTilesAndCorners()
+{
+  for(auto& [id, tile] : m_tileMap)
+  {
+    for(const auto& corner : tile.getAllPossibleCorners())
+    {
+      if(m_cornerMap.find(corner.id()) != m_cornerMap.end())
+      {
+        tile.addCorner(m_cornerMap.at(corner.id()));
+        m_cornerMap.at(corner.id()).addTile(tile);
+      }
+    }
+  }
+}
+void WorldGenerator::linkCornersAndEdges()
+{
+  //edges know their corners already after creation, so simply iterate over corners of edges
+  for(auto& [edgeId, edge] : m_edgeMap)
+  {
+    for(auto& corner : edge.getCorners())
+    {
+      corner.get().addEdge(edge);
     }
   }
 }

@@ -4,25 +4,25 @@
 #include <spdlog/spdlog.h>
 
 
-TEST(WorldGeneratorTest, generateFromInexistentFileShouldFail)
+TEST(WorldGeneratorTests, generateFromInexistentFileShouldFail)
 {
   WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("don't exist"));
 }
 
-TEST(WorldGeneratorTest, generateFromInvalidFileShouldFail)
+TEST(WorldGeneratorTests, generateFromInvalidFileShouldFail)
 {
   WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("data/field_invalidJson.json"));
 }
 
-TEST(WorldGeneratorTest, generateFromEmptyFileShouldFail)
+TEST(WorldGeneratorTests, generateFromEmptyFileShouldFail)
 {
   WorldGenerator fg;
   EXPECT_FALSE(fg.generateFromFile("data/field_emptyFile.json"));
 }
 
-TEST(WorldGeneratorTest, generateFromExistingFileShouldWork)
+TEST(WorldGeneratorTests, generateFromExistingFileShouldWork)
 {
   WorldGenerator fg;
   EXPECT_TRUE(fg.generateFromFile("data/field1.json"));

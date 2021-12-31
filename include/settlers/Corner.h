@@ -24,6 +24,8 @@ class Corner
   double q() const;
   double r() const;
   int id() const;
+  void addEdge(Edge& edge);
+  void addTile(Tile& tile);
 
-  static std::vector<Corner> getIntersectingCorners(const std::vector<Corner>& cornersA,const std::vector<Corner>& cornersB);
+  static std::vector<Corner> getOverlappingCorners(const std::vector<Corner>& cornersA,const std::vector<Corner>& cornersB);
 };
