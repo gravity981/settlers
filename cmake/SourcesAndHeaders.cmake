@@ -1,5 +1,4 @@
 set(sources
-		src/tmp.cpp
 		src/WorldGenerator.cpp
 		src/Tile.cpp
 		src/Corner.cpp
@@ -12,7 +11,6 @@ set(exe_sources
 )
 
 set(headers
-		include/settlers/tmp.hpp
 		include/settlers/WorldGenerator.h
 		include/settlers/Tile.h
 		include/settlers/Corner.h
@@ -20,7 +18,6 @@ set(headers
 )
 
 set(test_sources
-		src/tmp_Tests.cpp
 		src/WorldGenerator_Tests.cpp
 		src/Corner_Tests.cpp
 )
