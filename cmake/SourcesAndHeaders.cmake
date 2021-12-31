@@ -3,6 +3,9 @@ set(sources
 		src/Tile.cpp
 		src/Corner.cpp
 		src/Edge.cpp
+		src/Road.cpp
+		src/Settlement.cpp
+		src/Territory.cpp
 )
 
 set(exe_sources
@@ -15,6 +18,9 @@ set(headers
 		include/settlers/Tile.h
 		include/settlers/Corner.h
 		include/settlers/Edge.h
+		include/settlers/Road.h
+		include/settlers/Settlement.h
+		include/settlers/Territory.h
 )
 
 set(test_sources
