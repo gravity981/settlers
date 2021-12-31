@@ -25,8 +25,8 @@ class WorldGenerator
   const std::map<int, Road>& getRoads() const;
 
  private:
-  static bool readFile(const std::string& filePath, nlohmann::json& jsonData);
-  bool createTerritories(nlohmann::json jsonData);
+  bool readFile(const std::string& filePath);
+  bool createTerritories();
   bool calculateTileTypes();
   void calculateCoastTiles();
   bool calculateLandTiles();

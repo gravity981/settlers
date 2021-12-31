@@ -17,18 +17,21 @@ WorldGenerator::~WorldGenerator()
 
 bool WorldGenerator::generateFromFile(const std::string& filePath)
 {
-  // read file
   m_jsonData.clear();
-  if (!readFile(filePath, m_jsonData))
+  m_territoryMap.clear();
+  m_settlementMap.clear();
+  m_roadMap.clear();
+  // read file
+  if (!readFile(filePath))
   {
     return false;
   }
   // world related stuff
-  if (!createTerritories(m_jsonData))
+  if (!createTerritories())
   {
     return false;
   }
-  linkNeighborTerritories();
+  linkNeighborTerritories(); //must happen before creating settlements and roads
   createSettlementsAndRoads();
   linkTerritoriesAndSettlements();
   linkSettlementsAndRoads();
@@ -41,7 +44,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   return true;
 }
 
-bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
+bool WorldGenerator::readFile(const std::string& filePath)
 {
   std::ifstream ifs;
   ifs.open(filePath, std::ifstream::in);
@@ -53,7 +56,7 @@ bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonD
   bool success = false;
   try
   {
-    ifs >> jsonData;
+    ifs >> m_jsonData;
     success = true;
   }
   catch (nlohmann::json::parse_error& ex)
@@ -68,12 +71,12 @@ bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonD
   return success;
 }
 
-bool WorldGenerator::createTerritories(nlohmann::json jsonData)
+bool WorldGenerator::createTerritories()
 {
   bool success = true;
   try
   {
-    for (auto& obj : jsonData["tiles"])
+    for (auto& obj : m_jsonData["tiles"])
     {
       auto q = obj["q"].get<int>();
       auto r = obj["r"].get<int>();
@@ -185,6 +188,7 @@ bool WorldGenerator::calculateLandTiles()
   }
   return true;
 }
+
 void WorldGenerator::createSettlementsAndRoads()
 {
   // loop through all tiles
