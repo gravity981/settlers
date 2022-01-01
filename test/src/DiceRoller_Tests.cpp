@@ -74,9 +74,9 @@ TEST(DiceRollerTests, checkRandomDistribution)
 {
   int numberOfRolls = 100000;
   // statistically, each value of the 10-sided dice should be rolled 100'000 / 10 = 10'000 times
-  // give a margin of +- 200 because number of rolls is not infinite
-  int rangeMin = 9800;
-  int rangeMax = 10200;
+  // give a margin of +- 500 because number of rolls is not infinite
+  int rangeMin = 9500;
+  int rangeMax = 10500;
   DiceRoller roller(1, 1, 10, DiceRoller::randomSeed());
   std::map<int, int> diceDistribution;
   for (int i = 0; i < numberOfRolls; i++)
