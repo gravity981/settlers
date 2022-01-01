@@ -6,6 +6,7 @@ set(sources
 		src/Road.cpp
 		src/Settlement.cpp
 		src/Territory.cpp
+		src/DiceRoller.cpp
 )
 
 set(exe_sources
@@ -21,9 +22,11 @@ set(headers
 		include/settlers/Road.h
 		include/settlers/Settlement.h
 		include/settlers/Territory.h
+		include/settlers/DiceRoller.h
 )
 
 set(test_sources
 		src/WorldGenerator_Tests.cpp
 		src/Corner_Tests.cpp
+		src/DiceRoller_Tests.cpp
 )
