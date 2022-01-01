@@ -76,7 +76,7 @@ TEST(DiceRollerTests, checkRandomDistribution)
   // statistically, each value of the 10-sided dice should be rolled 100'000 / 10 = 10'000 times
   // give a margin of +- 200 because number of rolls is not infinite
   int rangeMin = 9800;
-  int rageMax = 10200;
+  int rangeMax = 10200;
   DiceRoller roller(1, 1, 10, DiceRoller::randomSeed());
   std::map<int, int> diceDistribution;
   for (int i = 0; i < numberOfRolls; i++)
@@ -92,16 +92,16 @@ TEST(DiceRollerTests, checkRandomDistribution)
     }
   }
   ASSERT_EQ(diceDistribution.size(), 10);
-  EXPECT_THAT(diceDistribution[1], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[2], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[3], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[4], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[5], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[6], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[7], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[8], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[9], IsBetween(rangeMin, rageMax));
-  EXPECT_THAT(diceDistribution[10], IsBetween(rangeMin, rageMax));
+  EXPECT_THAT(diceDistribution[1], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[2], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[3], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[4], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[5], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[6], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[7], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[8], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[9], IsBetween(rangeMin, rangeMax));
+  EXPECT_THAT(diceDistribution[10], IsBetween(rangeMin, rangeMax));
 
 }
 
