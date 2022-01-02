@@ -35,7 +35,7 @@ jobs:
       run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=opt/settlers
       
     - name: build
-      run: cmake --build build --config $BUILD_TYPE -j4
+      run: cmake --build build --config $BUILD_TYPE -j8
 
     - name: run tests
       run: |
