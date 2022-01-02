@@ -20,7 +20,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   m_jsonData.clear();
   m_tileMap.clear();
   m_cornerMap.clear();
-  m_roadMap.clear();
+  m_edgeMap.clear();
   // read file
   if (!readFile(filePath))
   {
@@ -31,10 +31,10 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   {
     return false;
   }
-  linkNeighborTiles(); //must happen before creating corners and roads
-  createCornersAndRoads();
+  linkNeighborTiles(); //must happen before creating corners and edges
+  createCornersAndEdges();
   linkTilesAndCorners();
-  linkCornersAndRoads();
+  linkCornersAndEdges();
 
   // game related stuff
   if (!calculateTileTypes())
@@ -189,7 +189,7 @@ bool WorldGenerator::calculateLandTiles()
   return true;
 }
 
-void WorldGenerator::createCornersAndRoads()
+void WorldGenerator::createCornersAndEdges()
 {
   // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
@@ -210,10 +210,10 @@ void WorldGenerator::createCornersAndRoads()
       // create edge between neighbors if not exists already
       auto edgeId = Edge::id(overlappingCorners);
       bool isNewEdge = false;
-      if (m_roadMap.find(edgeId) == m_roadMap.end())
+      if (m_edgeMap.find(edgeId) == m_edgeMap.end())
       {
         isNewEdge = true;
-        m_roadMap.insert(std::make_pair(edgeId, Road{}));
+        m_edgeMap.insert(std::make_pair(edgeId, Edge{}));
       }
 
       // loop through overlapping corners
@@ -228,7 +228,7 @@ void WorldGenerator::createCornersAndRoads()
         // add corner to edge
         if (isNewEdge)
         {
-          m_roadMap.at(edgeId).addCorner(m_cornerMap.at(cornerId));
+          m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(cornerId));
         }
       }
     }
@@ -265,14 +265,14 @@ void WorldGenerator::linkTilesAndCorners()
   }
 }
 
-void WorldGenerator::linkCornersAndRoads()
+void WorldGenerator::linkCornersAndEdges()
 {
   // edges know their corners already after creation, so simply iterate over corners of edges
-  for (auto& [edgeId, road] : m_roadMap)
+  for (auto& [edgeId, edge] : m_edgeMap)
   {
-    for (auto& corner : road.getCorners())
+    for (auto& corner : edge.getCorners())
     {
-      corner.get().addEdge(road);
+      corner.get().addEdge(edge);
     }
   }
 }
@@ -287,7 +287,7 @@ const std::map<int, Corner>& WorldGenerator::getCorners() const
   return m_cornerMap;
 }
 
-const std::map<int, Road>& WorldGenerator::getRoads() const
+const std::map<int, Edge>& WorldGenerator::getEdges() const
 {
-  return m_roadMap;
+  return m_edgeMap;
 }

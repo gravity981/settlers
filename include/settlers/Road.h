@@ -1,9 +1,10 @@
 #pragma once
-#include "Edge.h"
 
-class Road: public Edge
+#include "IEdgeObject.h"
+
+class Road: public IEdgeObject
 {
  public:
   Road();
-  virtual ~Road();
+  ~Road() override;
 };

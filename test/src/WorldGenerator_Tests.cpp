@@ -26,7 +26,7 @@ TEST(WorldGeneratorTests, generateFromExistingFileShouldWork)
 {
   WorldGenerator fg;
   EXPECT_TRUE(fg.generateFromFile("data/field1.json"));
-  EXPECT_EQ(fg.getRoads().size(), 10);
+  EXPECT_EQ(fg.getEdges().size(), 10);
   EXPECT_EQ(fg.getTiles().size(), 7);
   EXPECT_EQ(fg.getCorners().size(), 12);
 }

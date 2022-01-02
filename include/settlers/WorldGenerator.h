@@ -2,7 +2,7 @@
 
 #include "Tile.h"
 #include "Corner.h"
-#include "Road.h"
+#include "Edge.h"
 
 #include <nlohmann/json.hpp>
 #include <string>
@@ -13,7 +13,7 @@ class WorldGenerator
   nlohmann::json m_jsonData;
   std::map<int, Tile> m_tileMap;
   std::map<int, Corner> m_cornerMap;
-  std::map<int, Road> m_roadMap;
+  std::map<int, Edge> m_edgeMap;
  public:
   explicit WorldGenerator();
   virtual ~WorldGenerator();
@@ -22,7 +22,7 @@ class WorldGenerator
 
   const std::map<int, Tile>& getTiles() const;
   const std::map<int, Corner>& getCorners() const;
-  const std::map<int, Road>& getRoads() const;
+  const std::map<int, Edge>& getEdges() const;
 
  private:
   bool readFile(const std::string& filePath);
@@ -30,8 +30,8 @@ class WorldGenerator
   bool calculateTileTypes();
   void calculateCoastTiles();
   bool calculateLandTiles();
-  void createCornersAndRoads();
+  void createCornersAndEdges();
   void linkTilesAndCorners();
-  void linkCornersAndRoads();
+  void linkCornersAndEdges();
   void linkNeighborTiles();
 };
