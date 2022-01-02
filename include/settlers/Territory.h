@@ -1,9 +1,10 @@
 #pragma once
-#include "Tile.h"
 
-class Territory: public Tile
+#include "ITileObject.h"
+
+class Territory: public ITileObject
 {
  public:
-  Territory(int q, int r);
-  virtual ~Territory();
+  Territory();
+  ~Territory() override;
 };

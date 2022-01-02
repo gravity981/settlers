@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ITileObject.h"
+
 #include <string>
 #include <vector>
 #include <functional>
@@ -23,6 +25,8 @@ class Tile
   const int m_r;
   std::vector<std::reference_wrapper<Corner>> m_corners;
   std::vector<std::reference_wrapper<Tile>> m_neighbors;
+
+  ITileObject* m_tileObject{nullptr};
 
   EType m_type{TYPE_UNDEFINED};
   int m_triggerValue{0};

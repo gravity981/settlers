@@ -18,7 +18,7 @@ WorldGenerator::~WorldGenerator()
 bool WorldGenerator::generateFromFile(const std::string& filePath)
 {
   m_jsonData.clear();
-  m_territoryMap.clear();
+  m_tileMap.clear();
   m_settlementMap.clear();
   m_roadMap.clear();
   // read file
@@ -27,13 +27,13 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
     return false;
   }
   // world related stuff
-  if (!createTerritories())
+  if (!createTiles())
   {
     return false;
   }
-  linkNeighborTerritories(); //must happen before creating settlements and roads
+  linkNeighborTiles(); //must happen before creating settlements and roads
   createSettlementsAndRoads();
-  linkTerritoriesAndSettlements();
+  linkTilesAndSettlements();
   linkSettlementsAndRoads();
 
   // game related stuff
@@ -71,7 +71,7 @@ bool WorldGenerator::readFile(const std::string& filePath)
   return success;
 }
 
-bool WorldGenerator::createTerritories()
+bool WorldGenerator::createTiles()
 {
   bool success = true;
   try
@@ -81,15 +81,15 @@ bool WorldGenerator::createTerritories()
       auto q = obj["q"].get<int>();
       auto r = obj["r"].get<int>();
       auto type = obj.value("type", "");
-      Territory territory{ q, r };
-      territory.setType(Tile::typeFromString(type)); //todo this should be moved to another function for easier regeneration
-      if (m_territoryMap.find(territory.id()) == m_territoryMap.end())
+      Tile tile{ q, r };
+      tile.setType(Tile::typeFromString(type)); //todo this should be moved to another function for easier regeneration
+      if (m_tileMap.find(tile.id()) == m_tileMap.end())
       {
-        m_territoryMap.insert(std::make_pair(territory.id(), territory));
+        m_tileMap.insert(std::make_pair(tile.id(), tile));
       }
       else
       {
-        SPDLOG_ERROR("duplicated territories detected q: {}, r: {}, id: {}", q, r, territory.id());
+        SPDLOG_ERROR("duplicated tiles detected q: {}, r: {}, id: {}", q, r, tile.id());
         success = false;
       }
     }
@@ -101,7 +101,7 @@ bool WorldGenerator::createTerritories()
   }
   if (success)
   {
-    SPDLOG_INFO("generated territories");
+    SPDLOG_INFO("generated tiles");
   }
   return success;
 }
@@ -114,7 +114,7 @@ bool WorldGenerator::calculateTileTypes()
 
 void WorldGenerator::calculateCoastTiles()
 {
-  for (auto& [id, tile] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
     // all tiles which are at the border of the grid are considered coast.
     if (!tile.allNeighborsExist() && tile.getType() == Tile::TYPE_UNDEFINED)
@@ -148,7 +148,7 @@ bool WorldGenerator::calculateLandTiles()
   SPDLOG_INFO("raw typePool size: {}", typePool.size());
 
   // remove already assigned from tilePool
-  for (auto& [id, tile] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
     auto it = std::find(typePool.begin(), typePool.end(), tile.getType());
     if (it != typePool.end())
@@ -165,7 +165,7 @@ bool WorldGenerator::calculateLandTiles()
 
   // Choose a random mean between 1 and 6
   std::default_random_engine randomEngine(randomDevice());
-  for (auto& [id, tile] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
     if (tile.getType() == Tile::TYPE_UNDEFINED)
     {
@@ -192,19 +192,19 @@ bool WorldGenerator::calculateLandTiles()
 void WorldGenerator::createSettlementsAndRoads()
 {
   // loop through all tiles
-  for (auto& [id, territory] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
-    auto& neighbors = territory.getNeighbors();
+    auto& neighbors = tile.getNeighbors();
     // loop through each neighbors
     std::vector<Corner> overlappingCorners;
     for (auto& neighbor : neighbors)
     {
       const auto& neighborCorners = neighbor.get().getAllPossibleCorners();
-      auto possibleCorners = territory.getAllPossibleCorners();
+      auto possibleCorners = tile.getAllPossibleCorners();
       overlappingCorners = Corner::getOverlappingCorners(possibleCorners, neighborCorners);
       if (overlappingCorners.size() != 2)
       {
-        SPDLOG_WARN("unexpected number of overlapping corners between two territories: {}", overlappingCorners.size());
+        SPDLOG_WARN("unexpected number of overlapping corners between two tiles: {}", overlappingCorners.size());
       }
 
       // create edge between neighbors if not exists already
@@ -235,24 +235,24 @@ void WorldGenerator::createSettlementsAndRoads()
   }
 }
 
-void WorldGenerator::linkNeighborTerritories()
+void WorldGenerator::linkNeighborTiles()
 {
-  for (auto& [id, territory] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
-    auto possibleNeighbors = territory.getAllPossibleNeighbors();
+    auto possibleNeighbors = tile.getAllPossibleNeighbors();
     for (const auto& possibleNeighbor : possibleNeighbors)
     {
-      if (m_territoryMap.find(possibleNeighbor.id()) != m_territoryMap.end())
+      if (m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end())
       {
-        territory.addNeighbor(m_territoryMap.at(possibleNeighbor.id()));
+        tile.addNeighbor(m_tileMap.at(possibleNeighbor.id()));
       }
     }
   }
 }
 
-void WorldGenerator::linkTerritoriesAndSettlements()
+void WorldGenerator::linkTilesAndSettlements()
 {
-  for (auto& [id, tile] : m_territoryMap)
+  for (auto& [id, tile] : m_tileMap)
   {
     for (const auto& corner : tile.getAllPossibleCorners())
     {
@@ -277,9 +277,9 @@ void WorldGenerator::linkSettlementsAndRoads()
   }
 }
 
-const std::map<int, Territory>& WorldGenerator::getTerritories() const
+const std::map<int, Tile>& WorldGenerator::getTiles() const
 {
-  return m_territoryMap;
+  return m_tileMap;
 }
 
 const std::map<int, Settlement>& WorldGenerator::getSettlements() const

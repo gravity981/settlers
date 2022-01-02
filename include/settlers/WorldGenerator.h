@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Territory.h"
+#include "Tile.h"
 #include "Settlement.h"
 #include "Road.h"
 
@@ -11,7 +11,7 @@ class WorldGenerator
 {
  private:
   nlohmann::json m_jsonData;
-  std::map<int, Territory> m_territoryMap;
+  std::map<int, Tile> m_tileMap;
   std::map<int, Settlement> m_settlementMap;
   std::map<int, Road> m_roadMap;
  public:
@@ -20,18 +20,18 @@ class WorldGenerator
 
   bool generateFromFile(const std::string& filePath);
 
-  const std::map<int, Territory>& getTerritories() const;
+  const std::map<int, Tile>& getTiles() const;
   const std::map<int, Settlement>& getSettlements() const;
   const std::map<int, Road>& getRoads() const;
 
  private:
   bool readFile(const std::string& filePath);
-  bool createTerritories();
+  bool createTiles();
   bool calculateTileTypes();
   void calculateCoastTiles();
   bool calculateLandTiles();
   void createSettlementsAndRoads();
-  void linkTerritoriesAndSettlements();
+  void linkTilesAndSettlements();
   void linkSettlementsAndRoads();
-  void linkNeighborTerritories();
+  void linkNeighborTiles();
 };
