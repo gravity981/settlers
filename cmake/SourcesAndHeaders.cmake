@@ -24,6 +24,7 @@ set(headers
 		include/settlers/Territory.h
 		include/settlers/DiceRoller.h
 		include/settlers/ITileObject.h
+		include/settlers/ICornerObject.h
 )
 
 set(test_sources

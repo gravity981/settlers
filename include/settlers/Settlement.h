@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Corner.h"
+#include "ICornerObject.h"
 
-class Settlement: public Corner
+class Settlement: public ICornerObject
 {
  public:
-  Settlement(double q, double r);
-  virtual ~Settlement();
+  Settlement();
+  ~Settlement() override;
 };

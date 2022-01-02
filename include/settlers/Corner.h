@@ -2,6 +2,7 @@
 
 #include "Edge.h"
 #include "Tile.h"
+#include "ICornerObject.h"
 
 #include <vector>
 #include <functional>
@@ -15,6 +16,9 @@ class Corner
   const double m_r;
   std::vector<std::reference_wrapper<Edge>> m_edges;
   std::vector<std::reference_wrapper<Tile>> m_tiles;
+
+  ICornerObject* m_cornerObject{nullptr};
+  
  public:
   Corner(double q, double r);
   Corner(const Corner& corner);

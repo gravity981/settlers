@@ -19,7 +19,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
 {
   m_jsonData.clear();
   m_tileMap.clear();
-  m_settlementMap.clear();
+  m_cornerMap.clear();
   m_roadMap.clear();
   // read file
   if (!readFile(filePath))
@@ -31,10 +31,10 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   {
     return false;
   }
-  linkNeighborTiles(); //must happen before creating settlements and roads
-  createSettlementsAndRoads();
-  linkTilesAndSettlements();
-  linkSettlementsAndRoads();
+  linkNeighborTiles(); //must happen before creating corners and roads
+  createCornersAndRoads();
+  linkTilesAndCorners();
+  linkCornersAndRoads();
 
   // game related stuff
   if (!calculateTileTypes())
@@ -189,7 +189,7 @@ bool WorldGenerator::calculateLandTiles()
   return true;
 }
 
-void WorldGenerator::createSettlementsAndRoads()
+void WorldGenerator::createCornersAndRoads()
 {
   // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
@@ -221,14 +221,14 @@ void WorldGenerator::createSettlementsAndRoads()
       {
         auto cornerId = overlappingCorner.id();
         // create corner if not exist
-        if (m_settlementMap.find(cornerId) == m_settlementMap.end())
+        if (m_cornerMap.find(cornerId) == m_cornerMap.end())
         {
-          m_settlementMap.insert(std::make_pair(cornerId, Settlement{overlappingCorner.q(), overlappingCorner.r()}));
+          m_cornerMap.insert(std::make_pair(cornerId, Corner{overlappingCorner.q(), overlappingCorner.r()}));
         }
         // add corner to edge
         if (isNewEdge)
         {
-          m_roadMap.at(edgeId).addCorner(m_settlementMap.at(cornerId));
+          m_roadMap.at(edgeId).addCorner(m_cornerMap.at(cornerId));
         }
       }
     }
@@ -250,22 +250,22 @@ void WorldGenerator::linkNeighborTiles()
   }
 }
 
-void WorldGenerator::linkTilesAndSettlements()
+void WorldGenerator::linkTilesAndCorners()
 {
   for (auto& [id, tile] : m_tileMap)
   {
     for (const auto& corner : tile.getAllPossibleCorners())
     {
-      if (m_settlementMap.find(corner.id()) != m_settlementMap.end())
+      if (m_cornerMap.find(corner.id()) != m_cornerMap.end())
       {
-        tile.addCorner(m_settlementMap.at(corner.id()));
-        m_settlementMap.at(corner.id()).addTile(tile);
+        tile.addCorner(m_cornerMap.at(corner.id()));
+        m_cornerMap.at(corner.id()).addTile(tile);
       }
     }
   }
 }
 
-void WorldGenerator::linkSettlementsAndRoads()
+void WorldGenerator::linkCornersAndRoads()
 {
   // edges know their corners already after creation, so simply iterate over corners of edges
   for (auto& [edgeId, road] : m_roadMap)
@@ -282,9 +282,9 @@ const std::map<int, Tile>& WorldGenerator::getTiles() const
   return m_tileMap;
 }
 
-const std::map<int, Settlement>& WorldGenerator::getSettlements() const
+const std::map<int, Corner>& WorldGenerator::getCorners() const
 {
-  return m_settlementMap;
+  return m_cornerMap;
 }
 
 const std::map<int, Road>& WorldGenerator::getRoads() const
