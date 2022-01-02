@@ -1,11 +1,12 @@
 #include "settlers/WorldGenerator.h"
-#include "settlers/Territory.h"
+
+#include <spdlog/spdlog.h>
 
 #include <cstdlib>
 #include <fstream>
-#include <spdlog/spdlog.h>
-
 #include <random>
+
+#include "settlers/Territory.h"
 
 WorldGenerator::WorldGenerator()
 {
@@ -33,9 +34,10 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   {
     return false;
   }
-  linkNeighborTiles(); //must happen before creating corners and edges
+  linkNeighborTiles();  // must happen before creating corners and edges
   createCornersAndEdges();
   linkTilesAndCorners();
+  linkTilesAndEdges();
   linkCornersAndEdges();
 
   // game related stuff
@@ -110,23 +112,23 @@ bool WorldGenerator::createTiles()
 bool WorldGenerator::createTerritories()
 {
   std::vector<std::tuple<bool, int, int, Territory::EType>> territoryTypePool;
-  if(!initTerritoryTypePool(territoryTypePool))
+  if (!initTerritoryTypePool(territoryTypePool))
   {
     return false;
   }
-  if(!createPredefinedTerritories(territoryTypePool))
+  if (!createPredefinedTerritories(territoryTypePool))
   {
     return false;
   }
-  if(!createCoastTerritories(territoryTypePool))
+  if (!createCoastTerritories(territoryTypePool))
   {
     return false;
   }
-  if(!createRandomTerritories(territoryTypePool))
+  if (!createRandomTerritories(territoryTypePool))
   {
     return false;
   }
-  if(!territoryTypePool.empty())
+  if (!territoryTypePool.empty())
   {
     SPDLOG_ERROR("there are {} remaining territories to be assigned", territoryTypePool.size());
     return false;
@@ -141,7 +143,7 @@ bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool
     // all tiles which are at the border of the grid are considered coast.
     if (!tile.allNeighborsExist() && tile.getTileObject() == nullptr)
     {
-      if(consumeTerritoryType(territoryTypePool, Territory::TYPE_COAST))
+      if (consumeTerritoryType(territoryTypePool, Territory::TYPE_COAST))
       {
         createTerritory(tile, Territory::TYPE_COAST);
       }
@@ -171,24 +173,23 @@ bool WorldGenerator::createRandomTerritories(TerritoryTypePool& territoryTypePoo
       auto randomIndex = uniform_dist(randomEngine);
       auto entry = territoryTypePool.at(randomIndex);
       createTerritory(tile, std::get<3>(entry));
-      //consume from pool
+      // consume from pool
       territoryTypePool.erase(std::next(territoryTypePool.begin(), static_cast<long>(randomIndex)));
     }
   }
   return true;
 }
 
-bool WorldGenerator::createPredefinedTerritories(
-    TerritoryTypePool& territoryTypePool)
+bool WorldGenerator::createPredefinedTerritories(TerritoryTypePool& territoryTypePool)
 {
-  for(auto it = territoryTypePool.begin(); it != territoryTypePool.end(); )
+  for (auto it = territoryTypePool.begin(); it != territoryTypePool.end();)
   {
     auto entry = *it;
-    Tile tmpTile = Tile{std::get<1>(entry), std::get<2>(entry)};
-    if(!std::get<0>(entry))
+    Tile tmpTile = Tile{ std::get<1>(entry), std::get<2>(entry) };
+    if (!std::get<0>(entry))
     {
-      //assign predefined territory type to tile and consume from pool
-      if(m_tileMap.find(tmpTile.id()) != m_tileMap.end())
+      // assign predefined territory type to tile and consume from pool
+      if (m_tileMap.find(tmpTile.id()) != m_tileMap.end())
       {
         createTerritory(m_tileMap.at(tmpTile.id()), std::get<3>(entry));
       }
@@ -209,7 +210,7 @@ bool WorldGenerator::createPredefinedTerritories(
 
 bool WorldGenerator::consumeTerritoryType(TerritoryTypePool& territoryTypePool, Territory::EType type)
 {
-  for(auto it = territoryTypePool.begin(); it != territoryTypePool.end(); it++)
+  for (auto it = territoryTypePool.begin(); it != territoryTypePool.end(); it++)
   {
     if (std::get<3>(*it) == type)
     {
@@ -223,10 +224,10 @@ bool WorldGenerator::consumeTerritoryType(TerritoryTypePool& territoryTypePool, 
 
 void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
 {
-    Territory territory{tile};
-    territory.setType(type);
-    m_territories.emplace_back(territory);
-    tile.setTileObject(&m_territories.back());
+  Territory territory{ tile };
+  territory.setType(type);
+  m_territories.emplace_back(territory);
+  tile.setTileObject(&m_territories.back());
 }
 
 bool WorldGenerator::initTerritoryTypePool(TerritoryTypePool& territoryTypePool)
@@ -237,7 +238,7 @@ bool WorldGenerator::initTerritoryTypePool(TerritoryTypePool& territoryTypePool)
     {
       auto typeStr = obj["type"].get<std::string>();
       auto type = Territory::typeFromString(typeStr);
-      if(type == Territory::TYPE_UNDEFINED)
+      if (type == Territory::TYPE_UNDEFINED)
       {
         SPDLOG_WARN("type \"{}\" is undefined, skip", typeStr);
       }
@@ -284,32 +285,33 @@ void WorldGenerator::createCornersAndEdges()
       {
         SPDLOG_WARN("unexpected number of overlapping corners between two tiles: {}", overlappingCorners.size());
       }
-
-      // create edge between neighbors if not exists already
-      auto edgeId = Edge::id(overlappingCorners);
-      bool isNewEdge = false;
-      if (m_edgeMap.find(edgeId) == m_edgeMap.end())
+      else
       {
-        isNewEdge = true;
-        Edge edge{};
-        edge.addTile(tile);
-        edge.addTile(neighbor);
-        m_edgeMap.insert(std::make_pair(edgeId, edge));
-      }
-
-      // loop through overlapping corners
-      for (auto& overlappingCorner : overlappingCorners)
-      {
-        auto cornerId = overlappingCorner.id();
-        // create corner if not exist
-        if (m_cornerMap.find(cornerId) == m_cornerMap.end())
+        // create corners
+        for (auto& overlappingCorner : overlappingCorners)
         {
-          m_cornerMap.insert(std::make_pair(cornerId, Corner{overlappingCorner.q(), overlappingCorner.r()}));
+          auto cornerId = overlappingCorner.id();
+          // create corner if not exist
+          if (m_cornerMap.find(cornerId) == m_cornerMap.end())
+          {
+            m_cornerMap.insert(std::make_pair(cornerId, Corner{ overlappingCorner.q(), overlappingCorner.r() }));
+          }
         }
-        // add corner to edge
-        if (isNewEdge)
+
+        // todo edge creation could be done in a separate step to reduce function length
+        // create edge between neighbors if not exists already
+        auto edgeId = Edge::id(overlappingCorners);
+        bool isNewEdge = false;
+        if (m_edgeMap.find(edgeId) == m_edgeMap.end())
         {
-          m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(cornerId));
+          Edge edge = Edge{
+            overlappingCorners[0].q(), overlappingCorners[0].r(), overlappingCorners[1].q(), overlappingCorners[1].r()
+          };
+          m_edgeMap.insert(std::make_pair(edgeId, edge));
+
+          //todo linking could be done in a separate step to make things easier to read
+          m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[0].id()));
+          m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[1].id()));
         }
       }
     }
@@ -339,7 +341,9 @@ void WorldGenerator::linkTilesAndCorners()
     {
       if (m_cornerMap.find(corner.id()) != m_cornerMap.end())
       {
+        // link tiles and corners
         tile.addCorner(m_cornerMap.at(corner.id()));
+        // link corners and tiles
         m_cornerMap.at(corner.id()).addTile(tile);
       }
     }
@@ -354,6 +358,25 @@ void WorldGenerator::linkCornersAndEdges()
     for (auto& corner : edge.getCorners())
     {
       corner.get().addEdge(edge);
+    }
+  }
+}
+
+void WorldGenerator::linkTilesAndEdges()
+{
+  for (auto& [id, tile] : m_tileMap)
+  {
+    auto possibleEdges = tile.getAllPossibleEdges();
+    for (const auto& edge : possibleEdges)
+    {
+      if (m_edgeMap.find(edge.id()) != m_edgeMap.end())
+      {
+        // link tiles and edges
+        auto& existingEdge = m_edgeMap.at(edge.id());
+        tile.addEdge(existingEdge);
+        // link edges and tiles
+        existingEdge.addTile(tile);
+      }
     }
   }
 }

@@ -43,4 +43,5 @@ class WorldGenerator
   void linkTilesAndCorners();
   void linkCornersAndEdges();
   void linkNeighborTiles();
+  void linkTilesAndEdges();
 };

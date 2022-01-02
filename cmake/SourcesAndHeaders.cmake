@@ -32,4 +32,5 @@ set(test_sources
 		src/WorldGenerator_Tests.cpp
 		src/Corner_Tests.cpp
 		src/DiceRoller_Tests.cpp
+		src/Tile_Tests.cpp
 )

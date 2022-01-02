@@ -1,11 +1,12 @@
 #include "settlers/Edge.h"
-#include "settlers/Corner.h"
 
 #include <spdlog/spdlog.h>
+
 #include <cmath>
 
+#include "settlers/Corner.h"
 
-Edge::Edge()
+Edge::Edge(double q1, double r1, double q2, double r2) : m_q1(q1), m_r1(r1), m_q2(q2), m_r2(r2)
 {
 }
 
@@ -23,12 +24,8 @@ std::vector<std::reference_wrapper<Corner>>& Edge::getCorners()
 
 int Edge::id() const
 {
-  std::vector<Corner> tmp;
-  for (auto& corner : m_corners)
-  {
-    tmp.emplace_back(Corner{ corner.get().q(), corner.get().r() });
-  }
-  return id(tmp);
+  std::vector<Corner> corners{{m_q1,m_r1}, {m_q2, m_r2}};
+  return id(corners);
 }
 
 int Edge::id(std::vector<Corner>& corners)
