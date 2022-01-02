@@ -18,7 +18,6 @@ class Tile
   const int m_q;
   const int m_r;
   std::vector<std::reference_wrapper<Corner>> m_corners;
-  std::vector<std::reference_wrapper<Tile>> m_neighbors;
   std::vector<std::reference_wrapper<Edge>> m_edges;
 
   ITileObject* m_tileObject{nullptr};
@@ -37,17 +36,10 @@ class Tile
   std::vector<Corner> getAllPossibleCorners() const;
   std::vector<Edge> getAllPossibleEdges() const;
 
-  void addNeighbor(Tile& tile);
-  std::vector<std::reference_wrapper<Tile>>& getNeighbors();
-
   void addCorner(Corner& corner);
   std::vector<std::reference_wrapper<Corner>>& getCorners();
-
   void addEdge(Edge& edge);
   std::vector<std::reference_wrapper<Edge>>& getEdges();
-
-
-  bool allNeighborsExist() const;
 
   void setTileObject(ITileObject* tileObject);
   ITileObject* getTileObject();

@@ -34,7 +34,6 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   {
     return false;
   }
-  linkNeighborTiles();  // must happen before creating corners and edges
   createCornersAndEdges();
   linkTilesAndCorners();
   linkTilesAndEdges();
@@ -141,7 +140,7 @@ bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool
   for (auto& [id, tile] : m_tileMap)
   {
     // all tiles which are at the border of the grid are considered coast.
-    if (!tile.allNeighborsExist() && tile.getTileObject() == nullptr)
+    if (getNeighborTiles(tile).size() != 6 && tile.getTileObject() == nullptr)
     {
       if (consumeTerritoryType(territoryTypePool, Territory::TYPE_COAST))
       {
@@ -273,7 +272,7 @@ void WorldGenerator::createCornersAndEdges()
   // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
   {
-    auto& neighbors = tile.getNeighbors();
+    auto neighbors = getNeighborTiles(tile);
     // loop through each neighbors
     std::vector<Corner> overlappingCorners;
     for (auto& neighbor : neighbors)
@@ -301,7 +300,6 @@ void WorldGenerator::createCornersAndEdges()
         // todo edge creation could be done in a separate step to reduce function length
         // create edge between neighbors if not exists already
         auto edgeId = Edge::id(overlappingCorners);
-        bool isNewEdge = false;
         if (m_edgeMap.find(edgeId) == m_edgeMap.end())
         {
           Edge edge = Edge{
@@ -313,21 +311,6 @@ void WorldGenerator::createCornersAndEdges()
           m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[0].id()));
           m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[1].id()));
         }
-      }
-    }
-  }
-}
-
-void WorldGenerator::linkNeighborTiles()
-{
-  for (auto& [id, tile] : m_tileMap)
-  {
-    auto possibleNeighbors = tile.getAllPossibleNeighbors();
-    for (const auto& possibleNeighbor : possibleNeighbors)
-    {
-      if (m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end())
-      {
-        tile.addNeighbor(m_tileMap.at(possibleNeighbor.id()));
       }
     }
   }
@@ -394,4 +377,15 @@ const std::map<int, Corner>& WorldGenerator::getCorners() const
 const std::map<int, Edge>& WorldGenerator::getEdges() const
 {
   return m_edgeMap;
+}
+std::vector<std::reference_wrapper<Tile>> WorldGenerator::getNeighborTiles(const Tile& tile)
+{
+  std::vector<std::reference_wrapper<Tile>> neighbors;
+  for(auto& possibleNeighbor : tile.getAllPossibleNeighbors())
+  {
+    if(m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end()){
+      neighbors.emplace_back(m_tileMap.at(possibleNeighbor.id()));
+    }
+  }
+  return neighbors;
 }

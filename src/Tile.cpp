@@ -55,30 +55,15 @@ std::vector<Corner> Tile::getAllPossibleCorners() const
   return { { q + 1.0 / 3.0, r - 2.0 / 3.0 }, { q + 2.0 / 3.0, r - 1.0 / 3.0 }, { q + 1.0 / 3.0, r + 1.0 / 3.0 },
            { q - 1.0 / 3.0, r + 2.0 / 3.0 }, { q - 2.0 / 3.0, r + 1.0 / 3.0 }, { q - 1.0 / 3.0, r - 1.0 / 3.0 } };
 }
-std::vector<std::reference_wrapper<Tile>>& Tile::getNeighbors()
-{
-  return m_neighbors;
-}
 
 std::vector<std::reference_wrapper<Corner>>& Tile::getCorners()
 {
   return m_corners;
 }
 
-void Tile::addNeighbor(Tile& tile)
-{
-  m_neighbors.emplace_back(tile);
-}
-
 void Tile::addCorner(Corner& corner)
 {
   m_corners.emplace_back(corner);
-}
-
-bool Tile::allNeighborsExist() const
-{
-  // a hex tile can be surrounded by 6 neighbors at max
-  return m_neighbors.size() == 6;
 }
 
 void Tile::setTileObject(ITileObject* tileObject)

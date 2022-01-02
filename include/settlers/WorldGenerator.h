@@ -42,6 +42,6 @@ class WorldGenerator
   bool consumeTerritoryType(TerritoryTypePool& territoryTypePool, Territory::EType type);
   void linkTilesAndCorners();
   void linkCornersAndEdges();
-  void linkNeighborTiles();
   void linkTilesAndEdges();
+  std::vector<std::reference_wrapper<Tile>> getNeighborTiles(const Tile& tile);
 };
