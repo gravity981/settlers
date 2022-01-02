@@ -1,5 +1,5 @@
 {
-  "pool": [
+  "territories": [
     {
       "type": "mountain",
       "amount": 0
@@ -14,7 +14,15 @@
     },
     {
       "type": "desert",
-      "amount": 1
+      "amount": 1,
+      "pos": {
+        "q": 0,
+        "r": 0
+      }
+    },
+    {
+      "type": "coast",
+      "amount": 6
     }
   ],
   "triggers": [
@@ -39,8 +47,7 @@
   "tiles": [
     {
       "q": 0,
-      "r": 0,
-      "type": "desert"
+      "r": 0
     },
     {
       "q": 1,

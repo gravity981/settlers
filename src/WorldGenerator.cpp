@@ -1,4 +1,5 @@
 #include "settlers/WorldGenerator.h"
+#include "settlers/Territory.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -26,6 +27,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   {
     return false;
   }
+
   // world related stuff
   if (!createTiles())
   {
@@ -37,7 +39,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath)
   linkCornersAndEdges();
 
   // game related stuff
-  if (!calculateTileTypes())
+  if (!createTerritories())
   {
     return false;
   }
@@ -82,7 +84,6 @@ bool WorldGenerator::createTiles()
       auto r = obj["r"].get<int>();
       auto type = obj.value("type", "");
       Tile tile{ q, r };
-      tile.setType(Tile::typeFromString(type)); //todo this should be moved to another function for easier regeneration
       if (m_tileMap.find(tile.id()) == m_tileMap.end())
       {
         m_tileMap.insert(std::make_pair(tile.id(), tile));
@@ -106,37 +107,149 @@ bool WorldGenerator::createTiles()
   return success;
 }
 
-bool WorldGenerator::calculateTileTypes()
+bool WorldGenerator::createTerritories()
 {
-  calculateCoastTiles();
-  return calculateLandTiles();
+  std::vector<std::tuple<bool, int, int, Territory::EType>> territoryTypePool;
+  if(!initTerritoryTypePool(territoryTypePool))
+  {
+    return false;
+  }
+  if(!createPredefinedTerritories(territoryTypePool))
+  {
+    return false;
+  }
+  if(!createCoastTerritories(territoryTypePool))
+  {
+    return false;
+  }
+  if(!createRandomTerritories(territoryTypePool))
+  {
+    return false;
+  }
+  if(!territoryTypePool.empty())
+  {
+    SPDLOG_ERROR("there are {} remaining territories to be assigned", territoryTypePool.size());
+    return false;
+  }
+  return true;
 }
 
-void WorldGenerator::calculateCoastTiles()
+bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool)
 {
   for (auto& [id, tile] : m_tileMap)
   {
     // all tiles which are at the border of the grid are considered coast.
-    if (!tile.allNeighborsExist() && tile.getType() == Tile::TYPE_UNDEFINED)
+    if (!tile.allNeighborsExist() && tile.getTileObject() == nullptr)
     {
-      tile.setType(Tile::TYPE_COAST);
+      if(consumeTerritoryType(territoryTypePool, Territory::TYPE_COAST))
+      {
+        createTerritory(tile, Territory::TYPE_COAST);
+      }
+      else
+      {
+        SPDLOG_ERROR("failed to create coast territories");
+        return false;
+      }
     }
   }
+  return true;
 }
 
-bool WorldGenerator::calculateLandTiles()
+bool WorldGenerator::createRandomTerritories(TerritoryTypePool& territoryTypePool)
 {
-  // create typePool;
-  std::vector<Tile::EType> typePool;
+  // todo Seed with a real random value, if available
+  std::random_device randomDevice;
+  std::default_random_engine randomEngine(randomDevice());
+  for (auto& [id, tile] : m_tileMap)
+  {
+    if (tile.getTileObject() == nullptr)
+    {
+      if (territoryTypePool.empty())
+      {
+        SPDLOG_ERROR("territory type pool starved");
+        return false;
+      }
+      std::uniform_int_distribution<size_t> uniform_dist(0, territoryTypePool.size() - 1);
+      auto randomIndex = uniform_dist(randomEngine);
+      auto entry = territoryTypePool.at(randomIndex);
+      createTerritory(tile, std::get<3>(entry));
+      //consume from pool
+      territoryTypePool.erase(std::next(territoryTypePool.begin(), static_cast<long>(randomIndex)));
+    }
+  }
+  return true;
+}
+
+bool WorldGenerator::createPredefinedTerritories(
+    TerritoryTypePool& territoryTypePool)
+{
+  for(auto it = territoryTypePool.begin(); it != territoryTypePool.end(); )
+  {
+    auto entry = *it;
+    Tile tmpTile = Tile{std::get<1>(entry), std::get<2>(entry)};
+    if(!std::get<0>(entry))
+    {
+      //assign predefined territory type to tile and consume from pool
+      if(m_tileMap.find(tmpTile.id()) != m_tileMap.end())
+      {
+        createTerritory(m_tileMap.at(tmpTile.id()), std::get<3>(entry));
+      }
+      else
+      {
+        SPDLOG_ERROR("tile for predefined territory q: {}, r: {} does not exist", tmpTile.q(), tmpTile.r());
+        return false;
+      }
+      it = territoryTypePool.erase(it);
+    }
+    else
+    {
+      it++;
+    }
+  }
+  return true;
+}
+
+bool WorldGenerator::consumeTerritoryType(TerritoryTypePool& territoryTypePool, Territory::EType type)
+{
+  for(auto it = territoryTypePool.begin(); it != territoryTypePool.end(); it++)
+  {
+    if (std::get<3>(*it) == type)
+    {
+      territoryTypePool.erase(it);
+      return true;
+    }
+  }
+  SPDLOG_ERROR("no more {}-type territories in pool", type);
+  return false;
+}
+
+void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
+{
+    Territory territory{tile};
+    territory.setType(type);
+    m_territories.emplace_back(territory);
+    tile.setTileObject(&m_territories.back());
+}
+
+bool WorldGenerator::initTerritoryTypePool(TerritoryTypePool& territoryTypePool)
+{
   try
   {
-    for (const auto& obj : m_jsonData["pool"])
+    for (const auto& obj : m_jsonData["territories"])
     {
-      auto type = Tile::typeFromString(obj["type"].get<std::string>());
+      auto type = Territory::typeFromString(obj["type"].get<std::string>());
       auto amount = obj["amount"].get<int>();
-      for (int i = 0; i < amount; i++)
+
+      if(!obj.contains("pos"))
       {
-        typePool.push_back(type);
+        for (int i = 0; i < amount; i++)
+        {
+          territoryTypePool.push_back(std::make_tuple(true, 0, 0, type));
+        }
+      }
+      else
+      {
+        territoryTypePool.push_back(std::make_tuple(false, obj["pos"]["q"].get<int>(), obj["pos"]["r"].get<int>(), type));
       }
     }
   }
@@ -145,47 +258,7 @@ bool WorldGenerator::calculateLandTiles()
     SPDLOG_ERROR("{}", ex.what());
     return false;
   }
-  SPDLOG_INFO("raw typePool size: {}", typePool.size());
-
-  // remove already assigned from tilePool
-  for (auto& [id, tile] : m_tileMap)
-  {
-    auto it = std::find(typePool.begin(), typePool.end(), tile.getType());
-    if (it != typePool.end())
-    {
-      typePool.erase(it);
-    }
-  }
-  SPDLOG_INFO("typePool size after cleaning: {}", typePool.size());
-
-  // randomly assign tile types to still undefined tiles
-  bool typePoolStarved = false;
-  // Seed with a real random value, if available
-  std::random_device randomDevice;
-
-  // Choose a random mean between 1 and 6
-  std::default_random_engine randomEngine(randomDevice());
-  for (auto& [id, tile] : m_tileMap)
-  {
-    if (tile.getType() == Tile::TYPE_UNDEFINED)
-    {
-      if (typePool.empty())
-      {
-        typePoolStarved = true;
-        break;
-      }
-      std::uniform_int_distribution<size_t> uniform_dist(0, typePool.size());
-      auto randomIndex = uniform_dist(randomEngine);
-      tile.setType(typePool.at(randomIndex));
-      typePool.erase(std::next(typePool.begin(), static_cast<long>(randomIndex)));
-    }
-  }
-  SPDLOG_INFO("typePool size after assigning remaining tiles: {}", typePool.size());
-  if (!typePool.empty() || typePoolStarved)
-  {
-    SPDLOG_ERROR("mismatch between amount of existing tiles and typePool size");
-    return false;
-  }
+  SPDLOG_INFO("territoryTypePool size : {}", territoryTypePool.size());
   return true;
 }
 

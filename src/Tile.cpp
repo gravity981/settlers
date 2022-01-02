@@ -38,49 +38,7 @@ int Tile::id() const
   return m_q * Tile::MAX + m_r;
 }
 
-void Tile::setType(Tile::EType type)
-{
-  m_type = type;
-}
 
-void Tile::setTriggerValue(int value)
-{
-  m_triggerValue = value;
-}
-
-Tile::EType Tile::getType() const
-{
-  return m_type;
-}
-
-int Tile::getTriggerValue() const
-{
-  return m_triggerValue;
-}
-Tile::EType Tile::typeFromString(const std::string& typeStr)
-{
-  if (typeStr == "desert")
-  {
-    return TYPE_DESERT;
-  }
-  if (typeStr == "coast")
-  {
-    return TYPE_COAST;
-  }
-  if (typeStr == "mountain")
-  {
-    return TYPE_MOUNTAIN;
-  }
-  if (typeStr == "meadow")
-  {
-    return TYPE_MEADOW;
-  }
-  if (typeStr == "forest")
-  {
-    return TYPE_FOREST;
-  }
-  return TYPE_UNDEFINED;
-}
 std::vector<Tile> Tile::getAllPossibleNeighbors() const
 {
   // a tile has 6 neighbors
@@ -126,4 +84,16 @@ bool Tile::allNeighborsExist() const
 {
   // a hex tile can be surrounded by 6 neighbors at max
   return m_neighbors.size() == 6;
+}
+void Tile::setTileObject(ITileObject* tileObject)
+{
+  if(tileObject == nullptr)
+  {
+    return;
+  }
+  m_tileObject = tileObject;
+}
+ITileObject* Tile::getTileObject()
+{
+  return m_tileObject;
 }
