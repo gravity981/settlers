@@ -291,7 +291,10 @@ void WorldGenerator::createCornersAndEdges()
       if (m_edgeMap.find(edgeId) == m_edgeMap.end())
       {
         isNewEdge = true;
-        m_edgeMap.insert(std::make_pair(edgeId, Edge{}));
+        Edge edge{};
+        edge.addTile(tile);
+        edge.addTile(neighbor);
+        m_edgeMap.insert(std::make_pair(edgeId, edge));
       }
 
       // loop through overlapping corners

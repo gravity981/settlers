@@ -16,7 +16,7 @@ void Edge::addCorner(Corner& corner)
 {
   m_corners.emplace_back(corner);
 }
-std::vector<std::reference_wrapper<Corner>> Edge::getCorners()
+std::vector<std::reference_wrapper<Corner>>& Edge::getCorners()
 {
   return m_corners;
 }
@@ -48,4 +48,13 @@ int Edge::id(std::vector<Corner>& corners)
   r /= static_cast<double>(corners.size());
   int id = static_cast<int>(round(q * 100) * 1000 * 100 + round(r * 100));
   return id;
+}
+void Edge::addTile(Tile& tile)
+{
+  m_tiles.emplace_back(tile);
+}
+
+std::vector<std::reference_wrapper<Tile>>& Edge::getTiles()
+{
+  return m_tiles;
 }
