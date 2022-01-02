@@ -14,7 +14,9 @@ class Territory: public ITileObject
     TYPE_COAST,
     TYPE_MOUNTAIN,
     TYPE_MEADOW,
-    TYPE_FOREST
+    TYPE_FOREST,
+    TYPE_FIELD,
+    TYPE_HILLS
   };
 
   Tile& m_tile;

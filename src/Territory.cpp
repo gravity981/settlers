@@ -27,6 +27,7 @@ int Territory::getTriggerValue() const
 {
   return m_triggerValue;
 }
+
 Territory::EType Territory::typeFromString(const std::string& typeStr)
 {
   if (typeStr == "desert")
@@ -48,6 +49,14 @@ Territory::EType Territory::typeFromString(const std::string& typeStr)
   if (typeStr == "forest")
   {
     return TYPE_FOREST;
+  }
+  if(typeStr == "hills")
+  {
+    return TYPE_HILLS;
+  }
+  if(typeStr == "field")
+  {
+    return TYPE_FIELD;
   }
   return TYPE_UNDEFINED;
 }

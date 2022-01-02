@@ -13,6 +13,7 @@ using TerritoryTypePool = std::vector<std::tuple<bool, int, int, Territory::ETyp
 class WorldGenerator
 {
  private:
+  unsigned long m_seed;
   nlohmann::json m_jsonData;
   std::map<int, Tile> m_tileMap;
   std::map<int, Corner> m_cornerMap;
@@ -22,7 +23,7 @@ class WorldGenerator
   explicit WorldGenerator();
   virtual ~WorldGenerator();
 
-  bool generateFromFile(const std::string& filePath);
+  bool generateFromFile(const std::string& filePath, unsigned long seed);
 
   const std::map<int, Tile>& getTiles() const;
   const std::map<int, Corner>& getCorners() const;

@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <fstream>
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include <spdlog/spdlog.h>
 
 #include <random>
@@ -16,8 +15,9 @@ WorldGenerator::~WorldGenerator()
 {
 }
 
-bool WorldGenerator::generateFromFile(const std::string& filePath)
+bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long seed)
 {
+  m_seed = seed;
   m_jsonData.clear();
   m_tileMap.clear();
   m_cornerMap.clear();
@@ -157,9 +157,7 @@ bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool
 
 bool WorldGenerator::createRandomTerritories(TerritoryTypePool& territoryTypePool)
 {
-  // todo Seed with a real random value, if available
-  std::random_device randomDevice;
-  std::default_random_engine randomEngine(randomDevice());
+  std::default_random_engine randomEngine(m_seed);
   for (auto& [id, tile] : m_tileMap)
   {
     if (tile.getTileObject() == nullptr)
@@ -237,19 +235,26 @@ bool WorldGenerator::initTerritoryTypePool(TerritoryTypePool& territoryTypePool)
   {
     for (const auto& obj : m_jsonData["territories"])
     {
-      auto type = Territory::typeFromString(obj["type"].get<std::string>());
-      auto amount = obj["amount"].get<int>();
-
-      if(!obj.contains("pos"))
+      auto typeStr = obj["type"].get<std::string>();
+      auto type = Territory::typeFromString(typeStr);
+      if(type == Territory::TYPE_UNDEFINED)
       {
-        for (int i = 0; i < amount; i++)
-        {
-          territoryTypePool.push_back(std::make_tuple(true, 0, 0, type));
-        }
+        SPDLOG_WARN("type \"{}\" is undefined, skip", typeStr);
       }
       else
       {
-        territoryTypePool.push_back(std::make_tuple(false, obj["pos"]["q"].get<int>(), obj["pos"]["r"].get<int>(), type));
+        auto amount = obj["amount"].get<int>();
+        if (!obj.contains("pos"))
+        {
+          for (int i = 0; i < amount; i++)
+          {
+            territoryTypePool.push_back(std::make_tuple(true, 0, 0, type));
+          }
+        }
+        else
+        {
+          territoryTypePool.push_back(std::make_tuple(false, obj["pos"]["q"].get<int>(), obj["pos"]["r"].get<int>(), type));
+        }
       }
     }
   }
