@@ -1,10 +1,11 @@
 #pragma once
 
-#include "ITileObject.h"
-
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
+
+#include "ITileObject.h"
+#include "Sector.h"
 
 class Corner;
 class Edge;
@@ -19,12 +20,13 @@ class Tile
   const int m_r;
   std::vector<std::reference_wrapper<Corner>> m_corners;
   std::vector<std::reference_wrapper<Edge>> m_edges;
+  std::vector<std::reference_wrapper<Sector>> m_sectors;
 
-  ITileObject* m_tileObject{nullptr};
+  ITileObject* m_tileObject{ nullptr };
 
  public:
   Tile(int q, int r);
-  Tile(const Tile &tile);
+  Tile(const Tile& tile);
   virtual ~Tile();
 
   int q() const;
@@ -40,8 +42,9 @@ class Tile
   std::vector<std::reference_wrapper<Corner>>& getCorners();
   void addEdge(Edge& edge);
   std::vector<std::reference_wrapper<Edge>>& getEdges();
+  void addSector(Sector& sector);
+  std::vector<std::reference_wrapper<Sector>>& getSectors();
 
   void setTileObject(ITileObject* tileObject);
   ITileObject* getTileObject();
-
 };

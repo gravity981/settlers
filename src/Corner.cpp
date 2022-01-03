@@ -58,3 +58,7 @@ void Corner::addEdge(Edge& edge)
 {
   m_edges.emplace_back(edge);
 }
+void Corner::addSector(Sector& sector)
+{
+  m_sectors.emplace_back(sector);
+}

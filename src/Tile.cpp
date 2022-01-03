@@ -96,8 +96,16 @@ std::vector<Edge> Tile::getAllPossibleEdges() const
   for (size_t i = 0; i < 6; i++)
   {
     auto k = (i + 1) % 6;
-    Edge edge{corners[i].q(), corners[i].r(), corners[k].q(), corners[k].r()};
+    Edge edge{ corners[i].q(), corners[i].r(), corners[k].q(), corners[k].r() };
     edges.emplace_back(edge);
   }
   return edges;
+}
+void Tile::addSector(Sector& sector)
+{
+  m_sectors.emplace_back(sector);
+}
+std::vector<std::reference_wrapper<Sector>>& Tile::getSectors()
+{
+  return m_sectors;
 }

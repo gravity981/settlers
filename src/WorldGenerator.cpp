@@ -38,6 +38,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   linkTilesAndCorners();
   linkTilesAndEdges();
   linkCornersAndEdges();
+  createSectors();
 
   // game related stuff
   if (!createTerritories())
@@ -307,7 +308,7 @@ void WorldGenerator::createCornersAndEdges()
           };
           m_edgeMap.insert(std::make_pair(edgeId, edge));
 
-          //todo linking could be done in a separate step to make things easier to read
+          // todo linking could be done in a separate step to make things easier to read
           m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[0].id()));
           m_edgeMap.at(edgeId).addCorner(m_cornerMap.at(overlappingCorners[1].id()));
         }
@@ -381,11 +382,54 @@ const std::map<int, Edge>& WorldGenerator::getEdges() const
 std::vector<std::reference_wrapper<Tile>> WorldGenerator::getNeighborTiles(const Tile& tile)
 {
   std::vector<std::reference_wrapper<Tile>> neighbors;
-  for(auto& possibleNeighbor : tile.getAllPossibleNeighbors())
+  for (auto& possibleNeighbor : tile.getAllPossibleNeighbors())
   {
-    if(m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end()){
+    if (m_tileMap.find(possibleNeighbor.id()) != m_tileMap.end())
+    {
       neighbors.emplace_back(m_tileMap.at(possibleNeighbor.id()));
     }
   }
   return neighbors;
+}
+void WorldGenerator::createSectors()
+{
+  for (auto& [id, tile] : m_tileMap)
+  {
+    // there is a sector for each existing edge
+    for (auto& edge : tile.getEdges())
+    {
+      auto corners = edge.get().getCorners();
+      if (corners.size() != 2)
+      {
+        SPDLOG_WARN("edge with unexpected corner count, skip");
+      }
+      else
+      {
+        //create sector and link with tile and corners
+        Sector sector{
+            static_cast<double>(tile.q()),
+            static_cast<double>(tile.r()),
+            corners[0].get().q(),
+            corners[0].get().r(),
+            corners[1].get().q(),
+            corners[1].get().r(),
+            tile};
+        sector.addCorner(corners[0].get());
+        sector.addCorner(corners[1].get());
+        m_sectorMap.insert(std::make_pair(sector.id(), sector));
+
+        //link corners with sector
+        auto& realSector = m_sectorMap.at(sector.id());
+        corners[0].get().addSector(realSector);
+        corners[1].get().addSector(realSector);
+
+        //link tile with sector
+        tile.addSector(realSector);
+      }
+    }
+  }
+}
+const std::map<int, Sector>& WorldGenerator::getSectors() const
+{
+  return m_sectorMap;
 }

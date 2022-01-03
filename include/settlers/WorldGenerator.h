@@ -3,6 +3,7 @@
 #include "Tile.h"
 #include "Corner.h"
 #include "Edge.h"
+#include "Sector.h"
 #include "Territory.h"
 
 #include <nlohmann/json.hpp>
@@ -18,6 +19,7 @@ class WorldGenerator
   std::map<int, Tile> m_tileMap;
   std::map<int, Corner> m_cornerMap;
   std::map<int, Edge> m_edgeMap;
+  std::map<int, Sector> m_sectorMap;
   std::vector<Territory> m_territories;
  public:
   explicit WorldGenerator();
@@ -28,12 +30,14 @@ class WorldGenerator
   const std::map<int, Tile>& getTiles() const;
   const std::map<int, Corner>& getCorners() const;
   const std::map<int, Edge>& getEdges() const;
+  const std::map<int, Sector>& getSectors() const;
 
  private:
   bool readFile(const std::string& filePath);
   bool createTiles();
   void createCornersAndEdges();
   bool createTerritories();
+  void createSectors();
   bool initTerritoryTypePool(TerritoryTypePool& territoryTypePool);
   bool createPredefinedTerritories(TerritoryTypePool& territoryTypePool);
   bool createCoastTerritories(TerritoryTypePool& territoryTypePool);

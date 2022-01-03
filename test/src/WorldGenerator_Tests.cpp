@@ -26,18 +26,20 @@ TEST(WorldGeneratorTests, generateFromExistingFileShouldWork)
 {
   WorldGenerator fg;
   EXPECT_TRUE(fg.generateFromFile("data/field1.json", 0));
-  EXPECT_EQ(fg.getEdges().size(), 10);
   EXPECT_EQ(fg.getTiles().size(), 7);
   EXPECT_EQ(fg.getCorners().size(), 12);
+  EXPECT_EQ(fg.getEdges().size(), 10);
+  EXPECT_EQ(fg.getSectors().size(), 20);
 }
 
 TEST(WorldGeneratorTests, generateFromExistingFileOriginalShouldWork)
 {
   WorldGenerator fg;
   EXPECT_TRUE(fg.generateFromFile("data/field_original.json", 0));
-  EXPECT_EQ(fg.getEdges().size(), 90);
   EXPECT_EQ(fg.getTiles().size(), 37);
   EXPECT_EQ(fg.getCorners().size(), 72);
+  EXPECT_EQ(fg.getEdges().size(), 90);
+  EXPECT_EQ(fg.getSectors().size(), 180);
 }
 
 int main(int argc, char **argv)
