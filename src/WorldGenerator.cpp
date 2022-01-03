@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <random>
+
 
 #include "settlers/Territory.h"
 
@@ -18,11 +18,21 @@ WorldGenerator::~WorldGenerator()
 
 bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long seed)
 {
-  m_seed = seed;
+  m_randomEngine.seed(seed);
   m_jsonData.clear();
   m_tileMap.clear();
   m_cornerMap.clear();
   m_edgeMap.clear();
+  for (auto* territory : m_territories)
+  {
+    delete territory;
+  }
+  m_territories.clear();
+  for (auto* harbour : m_harbours)
+  {
+    delete harbour;
+  }
+  m_harbours.clear();
   // read file
   if (!readFile(filePath))
   {
@@ -108,46 +118,48 @@ bool WorldGenerator::createTiles()
   }
   if (success)
   {
-    SPDLOG_INFO("generated tiles");
+    SPDLOG_INFO("generated {} tiles", m_tileMap.size());
   }
   return success;
 }
 
 bool WorldGenerator::createTerritories()
 {
-  std::vector<std::tuple<bool, int, int, Territory::EType>> territoryTypePool;
-  if (!initTerritoryTypePool(territoryTypePool))
+  TerritoryPool territoryPool;
+  if (!initTerritoryPool(territoryPool))
   {
     return false;
   }
-  if (!createPredefinedTerritories(territoryTypePool))
+  auto territoryPoolCount = territoryPool.size();
+  if (!createPredefinedTerritories(territoryPool))
   {
     return false;
   }
-  if (!createCoastTerritories(territoryTypePool))
+  if (!createCoastTerritories(territoryPool))
   {
     return false;
   }
-  if (!createRandomTerritories(territoryTypePool))
+  if (!createRandomTerritories(territoryPool))
   {
     return false;
   }
-  if (!territoryTypePool.empty())
+  if (!territoryPool.empty())
   {
-    SPDLOG_ERROR("there are {} remaining territories to be assigned", territoryTypePool.size());
+    SPDLOG_ERROR("{} territories could not be placed", territoryPool.size());
     return false;
   }
+  SPDLOG_INFO("placed {} territories", territoryPoolCount);
   return true;
 }
 
-bool WorldGenerator::createCoastTerritories(TerritoryPool& territoryTypePool)
+bool WorldGenerator::createCoastTerritories(TerritoryPool& territoryPool)
 {
   for (auto& [id, tile] : m_tileMap)
   {
     // all tiles which are at the border of the grid are considered coast.
     if (getNeighborTiles(tile).size() != 6 && tile.getTileObject() == nullptr)
     {
-      if (consumeTerritoryType(territoryTypePool, Territory::TYPE_COAST))
+      if (consumeTerritoryType(territoryPool, Territory::TYPE_COAST))
       {
         createTerritory(tile, Territory::TYPE_COAST);
       }
@@ -161,32 +173,32 @@ bool WorldGenerator::createCoastTerritories(TerritoryPool& territoryTypePool)
   return true;
 }
 
-bool WorldGenerator::createRandomTerritories(TerritoryPool& territoryTypePool)
+bool WorldGenerator::createRandomTerritories(TerritoryPool& territoryPool)
 {
-  std::default_random_engine randomEngine(m_seed);
+
   for (auto& [id, tile] : m_tileMap)
   {
     if (tile.getTileObject() == nullptr)
     {
-      if (territoryTypePool.empty())
+      if (territoryPool.empty())
       {
         SPDLOG_ERROR("territory type pool starved");
         return false;
       }
-      std::uniform_int_distribution<size_t> uniform_dist(0, territoryTypePool.size() - 1);
-      auto randomIndex = uniform_dist(randomEngine);
-      auto entry = territoryTypePool.at(randomIndex);
+      std::uniform_int_distribution<size_t> uniform_dist(0, territoryPool.size() - 1);
+      auto randomIndex = uniform_dist(m_randomEngine);
+      auto entry = territoryPool.at(randomIndex);
       createTerritory(tile, std::get<3>(entry));
       // consume from pool
-      territoryTypePool.erase(std::next(territoryTypePool.begin(), static_cast<long>(randomIndex)));
+      territoryPool.erase(std::next(territoryPool.begin(), static_cast<long>(randomIndex)));
     }
   }
   return true;
 }
 
-bool WorldGenerator::createPredefinedTerritories(TerritoryPool& territoryTypePool)
+bool WorldGenerator::createPredefinedTerritories(TerritoryPool& territoryPool)
 {
-  for (auto it = territoryTypePool.begin(); it != territoryTypePool.end();)
+  for (auto it = territoryPool.begin(); it != territoryPool.end();)
   {
     auto entry = *it;
     Tile tmpTile = Tile{ std::get<1>(entry), std::get<2>(entry) };
@@ -202,7 +214,7 @@ bool WorldGenerator::createPredefinedTerritories(TerritoryPool& territoryTypePoo
         SPDLOG_ERROR("tile for predefined territory q: {}, r: {} does not exist", tmpTile.q(), tmpTile.r());
         return false;
       }
-      it = territoryTypePool.erase(it);
+      it = territoryPool.erase(it);
     }
     else
     {
@@ -229,12 +241,13 @@ bool WorldGenerator::consumeTerritoryType(TerritoryPool& territoryTypePool, Terr
 void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
 {
   auto territory = new Territory{ tile };
+  //todo set type in constructor
   territory->setType(type);
   m_territories.emplace_back(territory);
   tile.setTileObject(m_territories.back());
 }
 
-bool WorldGenerator::initTerritoryTypePool(TerritoryPool& territoryTypePool)
+bool WorldGenerator::initTerritoryPool(TerritoryPool& territoryPool)
 {
   try
   {
@@ -244,7 +257,7 @@ bool WorldGenerator::initTerritoryTypePool(TerritoryPool& territoryTypePool)
       auto type = Territory::typeFromString(typeStr);
       if (type == Territory::TYPE_UNDEFINED)
       {
-        SPDLOG_WARN("type \"{}\" is undefined, skip", typeStr);
+        SPDLOG_WARN("skip territory because of undefined type \"{}\"", typeStr);
       }
       else
       {
@@ -253,22 +266,21 @@ bool WorldGenerator::initTerritoryTypePool(TerritoryPool& territoryTypePool)
         {
           for (int i = 0; i < amount; i++)
           {
-            territoryTypePool.push_back(std::make_tuple(true, 0, 0, type));
+            territoryPool.push_back(std::make_tuple(true, 0, 0, type));
           }
         }
         else
         {
-          territoryTypePool.push_back(std::make_tuple(false, obj["pos"]["q"].get<int>(), obj["pos"]["r"].get<int>(), type));
+          territoryPool.push_back(std::make_tuple(false, obj["pos"]["q"].get<int>(), obj["pos"]["r"].get<int>(), type));
         }
       }
     }
   }
   catch (nlohmann::json::type_error& ex)
   {
-    SPDLOG_ERROR("{}", ex.what());
+    SPDLOG_ERROR("could not init territoryPool: {}", ex.what());
     return false;
   }
-  SPDLOG_INFO("territoryTypePool size : {}", territoryTypePool.size());
   return true;
 }
 
@@ -319,6 +331,8 @@ void WorldGenerator::createCornersAndEdges()
       }
     }
   }
+  SPDLOG_INFO("generated {} corners", m_cornerMap.size());
+  SPDLOG_INFO("generated {} edges", m_edgeMap.size());
 }
 
 void WorldGenerator::linkTilesAndCorners()
@@ -430,6 +444,7 @@ void WorldGenerator::createSectors()
       }
     }
   }
+  SPDLOG_INFO("generated {} sectors", m_sectorMap.size());
 }
 const std::map<int, Sector>& WorldGenerator::getSectors() const
 {
@@ -437,15 +452,157 @@ const std::map<int, Sector>& WorldGenerator::getSectors() const
 }
 bool WorldGenerator::createHarbours()
 {
-  for(auto& [id, sector] : m_sectorMap)
+  HarbourPool harbourPool;
+  if(!initHarbourPool(harbourPool))
   {
-    if(sector.getTile().getTileObject()->type() == ITileObject::TYPE_COAST)
+    return false;
+  }
+  auto harbourPoolCount = harbourPool.size();
+  if(!createPredefinedHarbours(harbourPool))
+  {
+    return false;
+  }
+  if(!createRandomHarbours(harbourPool))
+  {
+    return false;
+  }
+  if (!harbourPool.empty())
+  {
+    SPDLOG_ERROR("{} harbours could not be placed", harbourPool.size());
+    return false;
+  }
+  SPDLOG_INFO("placed {} harbours", harbourPoolCount);
+  return true;
+}
+bool WorldGenerator::initHarbourPool(HarbourPool& harbourPool)
+{
+  try
+  {
+    for (const auto& obj : m_jsonData["harbours"])
     {
-      if(sector.getOppositeTile()->getTileObject()->type() != ITileObject::TYPE_COAST)
+      auto effectStr = obj["effect"].get<std::string>();
+      auto resourceStr = obj["resource"].get<std::string>();
+      auto effect = Harbour::EffectFromString(effectStr);
+      auto resource = Harbour::ResourceFromString(resourceStr);
+      bool wellDefined = true;
+      if (effect == Harbour::EFFECT_UNDEFINED)
       {
-        //place harbour here
+        SPDLOG_WARN("skip harbour because of undefined effect \"{}\"", effectStr);
+        wellDefined = false;
+      }
+      if (resource == Harbour::RESOURCE_UNDEFINED)
+      {
+        SPDLOG_WARN("skip harbour because of undefined resource \"{}\"", resourceStr);
+        wellDefined = false;
+      }
+      if (wellDefined)
+      {
+        auto amount = obj["amount"].get<int>();
+        if (!obj.contains("pos"))
+        {
+          for (int i = 0; i < amount; i++)
+          {
+            harbourPool.push_back(std::make_tuple(true, 0, 0, 0, effect, resource));
+          }
+        }
+        else
+        {
+          auto q = obj["pos"]["q"].get<int>();
+          auto r = obj["pos"]["r"].get<int>();
+          auto nr = obj["pos"]["nr"].get<int>();
+          harbourPool.push_back(std::make_tuple(false, q, r, nr, effect, resource));
+        }
       }
     }
   }
+  catch (nlohmann::json::type_error& ex)
+  {
+    SPDLOG_ERROR("could not init harbourPool: {}", ex.what());
+    return false;
+  }
   return true;
+}
+bool WorldGenerator::createPredefinedHarbours(HarbourPool& harbourPool)
+{
+  for (auto it = harbourPool.begin(); it != harbourPool.end();)
+  {
+    auto entry = *it;
+    auto isRandomHarbour = std::get<0>(entry);
+    auto q = std::get<1>(entry);
+    auto r = std::get<2>(entry);
+    auto nr = std::get<3>(entry);
+    auto effect = std::get<4>(entry);
+    auto resource = std::get<5>(entry);
+    if (!isRandomHarbour)
+    {
+      auto sectorId = Sector::id(q, r, nr);
+      if (m_sectorMap.find(sectorId) != m_sectorMap.end())
+      {
+        auto sector = m_sectorMap.at(sectorId);
+        if(sector.getTile().getTileObject()->type() != ITileObject::TYPE_COAST ||
+            sector.getOppositeTile()->getTileObject()->type() == ITileObject::TYPE_COAST)
+        {
+          SPDLOG_WARN("predefined harbour q: {}, r: {}, nr: {}, is placed on non-coast sector", q, r, nr);
+        }
+        createHarbour(sector, effect, resource);
+      }
+      else
+      {
+        SPDLOG_ERROR("sector for predefined harbour q: {}, r: {}, nr: {} does not exist", q, r, nr);
+        return false;
+      }
+      it = harbourPool.erase(it);
+    }
+    else
+    {
+      it++;
+    }
+  }
+  return true;
+}
+
+bool WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
+{
+  std::vector<std::reference_wrapper<Sector>> harbourSectors;
+  for (auto& [id, sector] : m_sectorMap)
+  {
+    if (sector.getTile().getTileObject()->type() == ITileObject::TYPE_COAST)
+    {
+      if (sector.getOppositeTile()->getTileObject()->type() != ITileObject::TYPE_COAST)
+      {
+        harbourSectors.emplace_back(sector);
+      }
+    }
+  }
+  //////
+  std::vector<std::reference_wrapper<Sector>> out;
+  size_t nelems = harbourPool.size();
+  std::sample(
+      harbourSectors.begin(),
+      harbourSectors.end(),
+      std::back_inserter(out),
+      nelems,
+      std::mt19937{std::random_device{}()}
+  );
+  for (auto sector : out)
+  {
+    std::uniform_int_distribution<int> uniform_dist(0, static_cast<int>(harbourPool.size()) - 1);
+    auto randomIndex = uniform_dist(m_randomEngine);
+    auto entry = harbourPool.at(static_cast<size_t>(randomIndex));
+    auto effect = std::get<4>(entry);
+    auto resource = std::get<5>(entry);
+    harbourPool.erase(std::next(harbourPool.begin(), randomIndex));
+
+    // place harbour here
+    auto harbour = new Harbour{ effect, resource };
+    sector.get().setSectorObject(harbour);
+  }
+
+  return true;
+}
+void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource)
+{
+  auto harbour = new Harbour(effect, resource);
+  m_harbours.emplace_back(harbour);
+  sector.setSectorObject(harbour);
 }

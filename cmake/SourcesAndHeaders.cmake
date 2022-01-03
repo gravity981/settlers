@@ -8,6 +8,7 @@ set(sources
 		src/Territory.cpp
 		src/DiceRoller.cpp
 		src/Sector.cpp
+		src/Harbour.cpp
 )
 
 set(exe_sources
@@ -24,6 +25,7 @@ set(headers
 		include/settlers/Settlement.h
 		include/settlers/Territory.h
 		include/settlers/Sector.h
+		include/settlers/Harbour.h
 		include/settlers/DiceRoller.h
 		include/settlers/ITileObject.h
 		include/settlers/ICornerObject.h

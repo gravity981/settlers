@@ -1,6 +1,8 @@
 #include "settlers/Territory.h"
 
-Territory::Territory(Tile& tile): m_tile(tile)
+#include <spdlog/spdlog.h>
+
+Territory::Territory(Tile& tile) : m_tile(tile)
 {
 }
 
@@ -50,13 +52,14 @@ Territory::EType Territory::typeFromString(const std::string& typeStr)
   {
     return TYPE_FOREST;
   }
-  if(typeStr == "hills")
+  if (typeStr == "hills")
   {
     return TYPE_HILLS;
   }
-  if(typeStr == "field")
+  if (typeStr == "field")
   {
     return TYPE_FIELD;
   }
+  SPDLOG_WARN("type \"{}\" is undefined", typeStr);
   return TYPE_UNDEFINED;
 }

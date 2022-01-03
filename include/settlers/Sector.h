@@ -29,4 +29,8 @@ class Sector
 
   void setSectorObject(ISectorObject* sectorObject);
   ISectorObject* getSectorObject();
+
+  static int id(double q, double r, int sectorNr);
+ private:
+  static int id(double q1, double r1, double q2, double r2, double q3, double r3);
 };
