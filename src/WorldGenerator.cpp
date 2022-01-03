@@ -45,6 +45,10 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   {
     return false;
   }
+  if (!createHarbours())
+  {
+    return false;
+  }
   return true;
 }
 
@@ -136,7 +140,7 @@ bool WorldGenerator::createTerritories()
   return true;
 }
 
-bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool)
+bool WorldGenerator::createCoastTerritories(TerritoryPool& territoryTypePool)
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -157,7 +161,7 @@ bool WorldGenerator::createCoastTerritories(TerritoryTypePool& territoryTypePool
   return true;
 }
 
-bool WorldGenerator::createRandomTerritories(TerritoryTypePool& territoryTypePool)
+bool WorldGenerator::createRandomTerritories(TerritoryPool& territoryTypePool)
 {
   std::default_random_engine randomEngine(m_seed);
   for (auto& [id, tile] : m_tileMap)
@@ -180,7 +184,7 @@ bool WorldGenerator::createRandomTerritories(TerritoryTypePool& territoryTypePoo
   return true;
 }
 
-bool WorldGenerator::createPredefinedTerritories(TerritoryTypePool& territoryTypePool)
+bool WorldGenerator::createPredefinedTerritories(TerritoryPool& territoryTypePool)
 {
   for (auto it = territoryTypePool.begin(); it != territoryTypePool.end();)
   {
@@ -208,7 +212,7 @@ bool WorldGenerator::createPredefinedTerritories(TerritoryTypePool& territoryTyp
   return true;
 }
 
-bool WorldGenerator::consumeTerritoryType(TerritoryTypePool& territoryTypePool, Territory::EType type)
+bool WorldGenerator::consumeTerritoryType(TerritoryPool& territoryTypePool, Territory::EType type)
 {
   for (auto it = territoryTypePool.begin(); it != territoryTypePool.end(); it++)
   {
@@ -224,13 +228,13 @@ bool WorldGenerator::consumeTerritoryType(TerritoryTypePool& territoryTypePool, 
 
 void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
 {
-  Territory territory{ tile };
-  territory.setType(type);
+  auto territory = new Territory{ tile };
+  territory->setType(type);
   m_territories.emplace_back(territory);
-  tile.setTileObject(&m_territories.back());
+  tile.setTileObject(m_territories.back());
 }
 
-bool WorldGenerator::initTerritoryTypePool(TerritoryTypePool& territoryTypePool)
+bool WorldGenerator::initTerritoryTypePool(TerritoryPool& territoryTypePool)
 {
   try
   {
@@ -405,25 +409,23 @@ void WorldGenerator::createSectors()
       }
       else
       {
-        //create sector and link with tile and corners
-        Sector sector{
-            static_cast<double>(tile.q()),
-            static_cast<double>(tile.r()),
-            corners[0].get().q(),
-            corners[0].get().r(),
-            corners[1].get().q(),
-            corners[1].get().r(),
-            tile};
-        sector.addCorner(corners[0].get());
-        sector.addCorner(corners[1].get());
+        // create sector and link with tile and corners
+        Sector sector{ static_cast<double>(tile.q()),
+                       static_cast<double>(tile.r()),
+                       corners[0].get().q(),
+                       corners[0].get().r(),
+                       corners[1].get().q(),
+                       corners[1].get().r(),
+                       tile,
+                       edge };
         m_sectorMap.insert(std::make_pair(sector.id(), sector));
 
-        //link corners with sector
+        // link corners with sector
         auto& realSector = m_sectorMap.at(sector.id());
         corners[0].get().addSector(realSector);
         corners[1].get().addSector(realSector);
 
-        //link tile with sector
+        // link tile with sector
         tile.addSector(realSector);
       }
     }
@@ -432,4 +434,18 @@ void WorldGenerator::createSectors()
 const std::map<int, Sector>& WorldGenerator::getSectors() const
 {
   return m_sectorMap;
+}
+bool WorldGenerator::createHarbours()
+{
+  for(auto& [id, sector] : m_sectorMap)
+  {
+    if(sector.getTile().getTileObject()->type() == ITileObject::TYPE_COAST)
+    {
+      if(sector.getOppositeTile()->getTileObject()->type() != ITileObject::TYPE_COAST)
+      {
+        //place harbour here
+      }
+    }
+  }
+  return true;
 }

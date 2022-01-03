@@ -18,7 +18,7 @@ void Territory::setTriggerValue(int value)
   m_triggerValue = value;
 }
 
-Territory::EType Territory::getType() const
+ITileObject::EType Territory::type() const
 {
   return m_type;
 }

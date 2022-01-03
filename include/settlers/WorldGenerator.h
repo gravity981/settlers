@@ -9,7 +9,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-using TerritoryTypePool = std::vector<std::tuple<bool, int, int, Territory::EType>>;
+using TerritoryPool = std::vector<std::tuple<bool, int, int, ITileObject::EType>>;
+//using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Harbour::EResource>>;
 
 class WorldGenerator
 {
@@ -20,7 +21,7 @@ class WorldGenerator
   std::map<int, Corner> m_cornerMap;
   std::map<int, Edge> m_edgeMap;
   std::map<int, Sector> m_sectorMap;
-  std::vector<Territory> m_territories;
+  std::vector<Territory*> m_territories;
  public:
   explicit WorldGenerator();
   virtual ~WorldGenerator();
@@ -38,14 +39,15 @@ class WorldGenerator
   void createCornersAndEdges();
   bool createTerritories();
   void createSectors();
-  bool initTerritoryTypePool(TerritoryTypePool& territoryTypePool);
-  bool createPredefinedTerritories(TerritoryTypePool& territoryTypePool);
-  bool createCoastTerritories(TerritoryTypePool& territoryTypePool);
-  bool createRandomTerritories(TerritoryTypePool& territoryTypePool);
+  bool initTerritoryTypePool(TerritoryPool& territoryTypePool);
+  bool createPredefinedTerritories(TerritoryPool& territoryTypePool);
+  bool createCoastTerritories(TerritoryPool& territoryTypePool);
+  bool createRandomTerritories(TerritoryPool& territoryTypePool);
   void createTerritory(Tile& tile, Territory::EType type);
-  bool consumeTerritoryType(TerritoryTypePool& territoryTypePool, Territory::EType type);
+  bool consumeTerritoryType(TerritoryPool& territoryTypePool, Territory::EType type);
   void linkTilesAndCorners();
   void linkCornersAndEdges();
   void linkTilesAndEdges();
   std::vector<std::reference_wrapper<Tile>> getNeighborTiles(const Tile& tile);
+  bool createHarbours();
 };

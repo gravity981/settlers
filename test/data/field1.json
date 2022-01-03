@@ -1,4 +1,9 @@
 {
+  "dices": {
+    "amount": 2,
+    "min": 1,
+    "max": 6
+  },
   "territories": [
     {
       "type": "mountain",
@@ -25,13 +30,30 @@
       "amount": 6
     }
   ],
+  "harbours": [
+    {
+      "effect": "3:1",
+      "resource": "all",
+      "pos": {
+        "q": 1,
+        "r": 1,
+        "nr": 2
+      }
+    },
+    {
+      "effect": "2:1",
+      "resource": "clay"
+    }
+  ],
   "triggers": [
     {
       "value": 2,
+      "effect": "resource",
       "amount": 1
     },
     {
       "value": 8,
+      "effect": "resource",
       "amount": 2
     },
     {
@@ -39,11 +61,6 @@
       "effect": "raid"
     }
   ],
-  "randomizer": {
-    "summands": 2,
-    "min": 1,
-    "max": 6
-  },
   "tiles": [
     {
       "q": 0,

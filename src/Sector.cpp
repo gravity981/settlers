@@ -1,18 +1,20 @@
 #include "settlers/Sector.h"
 
 #include <cmath>
+#include <spdlog/spdlog.h>
 
-#include "settlers/Corner.h"
+#include "settlers/Edge.h"
 #include "settlers/Tile.h"
 
-Sector::Sector(double q1, double r1, double q2, double r2, double q3, double r3, Tile& tile)
+Sector::Sector(double q1, double r1, double q2, double r2, double q3, double r3, Tile& tile, Edge& edge)
     : m_q1(q1),
       m_r1(r1),
       m_q2(q2),
       m_r2(r2),
       m_q3(q3),
       m_r3(r3),
-      m_tile(tile)
+      m_tile(tile),
+      m_edge(edge)
 {
 }
 
@@ -20,14 +22,9 @@ Sector::~Sector()
 {
 }
 
-void Sector::addCorner(Corner& corner)
+Edge& Sector::getEdge()
 {
-  m_corners.emplace_back(corner);
-}
-
-std::vector<std::reference_wrapper<Corner>>& Sector::getCorners()
-{
-  return m_corners;
+  return m_edge;
 }
 
 Tile& Sector::getTile()
@@ -52,4 +49,16 @@ void Sector::setSectorObject(ISectorObject* sectorObject)
     return;
   }
   m_sectorObject = sectorObject;
+}
+Tile* Sector::getOppositeTile()
+{
+  for(auto& tile : m_edge.getTiles())
+  {
+    if(tile.get().id() != m_tile.id())
+    {
+      return &tile.get();
+    }
+  }
+  SPDLOG_ERROR("there is no oppsite tile");
+  return nullptr;
 }
