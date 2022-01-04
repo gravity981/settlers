@@ -1,0 +1,66 @@
+[
+  {
+    "type": "road",
+    "cost": [
+      {
+        "resource": "wood",
+        "amount": 1
+      },
+      {
+        "resource": "clay",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "type": "village",
+    "cost": [
+      {
+        "resource": "wood",
+        "amount": 1
+      },
+      {
+        "resource": "clay",
+        "amount": 1
+      },
+      {
+        "resource": "wheat",
+        "amount": 1
+      },
+      {
+        "resource": "sheep",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "type": "city",
+    "cost": [
+      {
+        "resource": "wheat",
+        "amount": 2
+      },
+      {
+        "resource": "stone",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "type": "development",
+    "cost": [
+      {
+        "resource": "wheat",
+        "amount": 1
+      },
+      {
+        "resource": "sheep",
+        "amount": 1
+      },
+      {
+        "resource": "stone",
+        "amount": 1
+      }
+    ]
+  }
+]

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ISectorObject.h"
+#include "Resource.h"
 
 class Harbour : public ISectorObject
 {
@@ -12,24 +13,15 @@ class Harbour : public ISectorObject
     EFFECT_2_FOR_1,
     EFFECT_UNDEFINED
   };
-  using EResource = enum EResource {
-    RESOURCE_CLAY,
-    RESOURCE_STONE,
-    RESOURCE_WHEAT,
-    RESOURCE_SHEEP,
-    RESOURCE_WOOD,
-    RESOURCE_ALL,
-    RESOURCE_UNDEFINED
-  };
 
  private:
   EEffect m_effect;
-  EResource m_resource;
+  Resource::EResource m_resource;
 
  public:
-  explicit Harbour(EEffect effect, EResource resource);
+  explicit Harbour(EEffect effect, Resource::EResource resource);
   virtual ~Harbour();
 
-  static EResource ResourceFromString(const std::string& resourceStr);
+  static Resource::EResource ResourceFromString(const std::string& resourceStr);
   static EEffect EffectFromString(const std::string& effectStr);
 };

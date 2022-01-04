@@ -2,42 +2,44 @@
 
 #include <spdlog/spdlog.h>
 
-Harbour::Harbour(EEffect effect, EResource resource) : m_effect(effect), m_resource(resource)
+Harbour::Harbour(EEffect effect, Resource::EResource resource) : m_effect(effect), m_resource(resource)
 {
 }
 
 Harbour::~Harbour()
 {
 }
-Harbour::EResource Harbour::ResourceFromString(const std::string& resourceStr)
+
+Resource::EResource Harbour::ResourceFromString(const std::string& resourceStr)
 {
   if (resourceStr == "clay")
   {
-    return RESOURCE_CLAY;
+    return Resource::RESOURCE_CLAY;
   }
   if (resourceStr == "sheep")
   {
-    return RESOURCE_SHEEP;
+    return Resource::RESOURCE_SHEEP;
   }
   if (resourceStr == "stone")
   {
-    return RESOURCE_STONE;
+    return Resource::RESOURCE_STONE;
   }
   if (resourceStr == "wheat")
   {
-    return RESOURCE_WHEAT;
+    return Resource::RESOURCE_WHEAT;
   }
   if (resourceStr == "wood")
   {
-    return RESOURCE_WOOD;
+    return Resource::RESOURCE_WOOD;
   }
   if (resourceStr == "all")
   {
-    return RESOURCE_ALL;
+    return Resource::RESOURCE_ALL;
   }
   SPDLOG_WARN("resource \"{}\" is undefined", resourceStr);
-  return RESOURCE_UNDEFINED;
+  return Resource::RESOURCE_UNDEFINED;
 }
+
 Harbour::EEffect Harbour::EffectFromString(const std::string& effectStr)
 {
   if(effectStr == "3:1")

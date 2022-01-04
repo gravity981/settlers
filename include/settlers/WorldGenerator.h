@@ -15,7 +15,7 @@
 #include "TriggerEffectCollection.h"
 
 using TerritoryPool = std::vector<std::tuple<bool, int, int, ITileObject::EType>>;
-using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Harbour::EResource>>;
+using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Resource::EResource>>;
 using TriggerValuePool = std::vector<std::tuple<int>>;
 
 class WorldGenerator
@@ -50,8 +50,9 @@ class WorldGenerator
   const std::vector<Road*> getRoads() const;
   const TriggerEffectCollection getTriggerEffectCollection() const;
 
+  static bool readFile(const std::string& filePath, nlohmann::json& jsonData);
+
  private:
-  bool readFile(const std::string& filePath);
   bool createTiles();
   void createCornersAndEdges();
   void createSectors();
@@ -62,7 +63,7 @@ class WorldGenerator
   bool initHarbourPool(HarbourPool& harbourPool);
   bool placePredefinedHarbours(HarbourPool& harbourPool);
   void placeRandomHarbours(HarbourPool& harbourPool);
-  void createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource);
+  void createHarbour(Sector& sector, Harbour::EEffect effect, Resource::EResource resource);
   bool initTerritoryPool(TerritoryPool& territoryPool);
   bool placePredefinedTerritories(TerritoryPool& territoryPool);
   bool placeCoastTerritories(TerritoryPool& territoryPool);

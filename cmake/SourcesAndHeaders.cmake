@@ -10,6 +10,8 @@ set(sources
 		src/Sector.cpp
 		src/Harbour.cpp
 		src/TriggerEffectCollection.cpp
+		src/TradingCenter.cpp
+		src/Resource.cpp
 )
 
 set(exe_sources
@@ -33,6 +35,8 @@ set(headers
 		include/settlers/ICornerObject.h
 		include/settlers/IEdgeObject.h
 		include/settlers/ISectorObject.h
+		include/settlers/TradingCenter.h
+		include/settlers/Resource.h
 )
 
 set(test_sources
@@ -40,4 +44,6 @@ set(test_sources
 		src/Corner_Tests.cpp
 		src/DiceRoller_Tests.cpp
 		src/Tile_Tests.cpp
+		src/TradingCenter_Tests.cpp
+		src/Resource_Tests.cpp
 )

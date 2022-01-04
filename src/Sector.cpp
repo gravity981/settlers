@@ -78,7 +78,7 @@ int Sector::id(double q, double r, int sectorNr)
     std::make_tuple(-2.0 / 3.0, 1.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0),
     std::make_tuple(-1.0 / 3.0, -1.0 / 3.0, 1.0 / 3.0, -2.0 / 3.0)
   };
-  auto corners = sectorCorners[sectorNr];
+  auto corners = sectorCorners[static_cast<size_t>(sectorNr)];
   return id(q, r, std::get<0>(corners), std::get<1>(corners), std::get<2>(corners), std::get<3>(corners));
 }
 int Sector::id(double q1, double r1, double q2, double r2, double q3, double r3)

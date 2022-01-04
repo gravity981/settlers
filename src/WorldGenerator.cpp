@@ -27,7 +27,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   removeSettlements();
   removeRoads();
   // read file
-  if (!readFile(filePath))
+  if (!readFile(filePath, m_jsonData))
   {
     return false;
   }
@@ -91,7 +91,7 @@ void WorldGenerator::removeHarbours()
   m_harbours.clear();
 }
 
-bool WorldGenerator::readFile(const std::string& filePath)
+bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
 {
   std::ifstream ifs;
   ifs.open(filePath, std::ifstream::in);
@@ -103,7 +103,7 @@ bool WorldGenerator::readFile(const std::string& filePath)
   bool success = false;
   try
   {
-    ifs >> m_jsonData;
+    ifs >> jsonData;
     success = true;
   }
   catch (nlohmann::json::parse_error& ex)
@@ -513,7 +513,7 @@ bool WorldGenerator::initHarbourPool(HarbourPool& harbourPool)
         SPDLOG_WARN("skip harbour because of undefined effect \"{}\"", effectStr);
         wellDefined = false;
       }
-      if (resource == Harbour::RESOURCE_UNDEFINED)
+      if (resource == Resource::RESOURCE_UNDEFINED)
       {
         SPDLOG_WARN("skip harbour because of undefined resource \"{}\"", resourceStr);
         wellDefined = false;
@@ -611,7 +611,7 @@ void WorldGenerator::placeRandomHarbours(HarbourPool& harbourPool)
     createHarbour(sector, effect, resource);
   }
 }
-void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource)
+void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Resource::EResource resource)
 {
   auto* harbour = new Harbour(effect, resource);
   m_harbours.emplace_back(harbour);
