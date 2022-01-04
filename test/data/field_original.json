@@ -36,15 +36,57 @@
   "triggers": [
     {
       "value": 2,
+      "effect": "resource",
       "amount": 1
     },
     {
-      "value": 8,
+      "value": 3,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 4,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 5,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 6,
+      "effect": "resource",
       "amount": 2
     },
     {
       "value": 7,
       "effect": "raid"
+    },
+    {
+      "value": 8,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 9,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 10,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 11,
+      "effect": "resource",
+      "amount": 2
+    },
+    {
+      "value": 12,
+      "effect": "resource",
+      "amount": 1
     }
   ],
   "randomizer": {

@@ -9,6 +9,7 @@ set(sources
 		src/DiceRoller.cpp
 		src/Sector.cpp
 		src/Harbour.cpp
+		src/TriggerEffectCollection.cpp
 )
 
 set(exe_sources
@@ -27,6 +28,7 @@ set(headers
 		include/settlers/Sector.h
 		include/settlers/Harbour.h
 		include/settlers/DiceRoller.h
+		include/settlers/TriggerEffectCollection.h
 		include/settlers/ITileObject.h
 		include/settlers/ICornerObject.h
 		include/settlers/IEdgeObject.h

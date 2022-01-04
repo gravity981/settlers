@@ -12,14 +12,16 @@
 #include "Settlement.h"
 #include "Territory.h"
 #include "Tile.h"
+#include "TriggerEffectCollection.h"
 
 using TerritoryPool = std::vector<std::tuple<bool, int, int, ITileObject::EType>>;
 using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Harbour::EResource>>;
+using TriggerValuePool = std::vector<std::tuple<int>>;
 
 class WorldGenerator
 {
  private:
-  std::default_random_engine m_randomEngine{};
+  std::default_random_engine m_randomEngine;
   nlohmann::json m_jsonData;
   std::map<int, Tile> m_tileMap;
   std::map<int, Corner> m_cornerMap;
@@ -29,6 +31,8 @@ class WorldGenerator
   std::vector<Harbour*> m_harbours;
   std::vector<Settlement*> m_settlements;
   std::vector<Road*> m_roads;
+
+  TriggerEffectCollection m_triggerEffectCollection;
 
  public:
   explicit WorldGenerator();
@@ -44,26 +48,29 @@ class WorldGenerator
   const std::vector<Harbour*> getHarbours() const;
   const std::vector<Settlement*> getSettlements() const;
   const std::vector<Road*> getRoads() const;
+  const TriggerEffectCollection getTriggerEffectCollection() const;
 
  private:
   bool readFile(const std::string& filePath);
   bool createTiles();
   void createCornersAndEdges();
   void createSectors();
-  bool createTerritories();
-  bool createHarbours();
-  void createSettlements();
-  void createRoads();
+  bool placeTerritories();
+  bool placeHarbours();
+  void placeSettlements();
+  void placeRoads();
   bool initHarbourPool(HarbourPool& harbourPool);
-  bool createPredefinedHarbours(HarbourPool& harbourPool);
-  void createRandomHarbours(HarbourPool& harbourPool);
+  bool placePredefinedHarbours(HarbourPool& harbourPool);
+  void placeRandomHarbours(HarbourPool& harbourPool);
   void createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource);
   bool initTerritoryPool(TerritoryPool& territoryPool);
-  bool createPredefinedTerritories(TerritoryPool& territoryPool);
-  bool createCoastTerritories(TerritoryPool& territoryPool);
-  bool createRandomTerritories(TerritoryPool& territoryPool);
+  bool placePredefinedTerritories(TerritoryPool& territoryPool);
+  bool placeCoastTerritories(TerritoryPool& territoryPool);
+  bool placeRandomTerritories(TerritoryPool& territoryPool);
   void createTerritory(Tile& tile, Territory::EType type);
-  bool consumeTerritoryType(TerritoryPool& territoryTypePool, Territory::EType type);
+  bool consumeTerritory(TerritoryPool& territoryPool, Territory::EType type);
+  bool createTriggerEffectsAndinitTriggerValuePool(TriggerValuePool& triggerValuePool);
+  bool placeTriggerValues(TriggerValuePool& triggerValuePool);
   void linkTilesAndCorners();
   void linkCornersAndEdges();
   void linkTilesAndEdges();
@@ -72,4 +79,5 @@ class WorldGenerator
   void removeTerritories();
   void removeSettlements();
   void removeRoads();
+  bool placeTriggerValues();
 };
