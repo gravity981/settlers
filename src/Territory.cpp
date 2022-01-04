@@ -2,17 +2,12 @@
 
 #include <spdlog/spdlog.h>
 
-Territory::Territory(Tile& tile) : m_tile(tile)
+Territory::Territory(Tile& tile, ITileObject::EType type) : m_tile(tile), m_type(type)
 {
 }
 
 Territory::~Territory()
 {
-}
-
-void Territory::setType(Territory::EType type)
-{
-  m_type = type;
 }
 
 void Territory::setTriggerValue(int value)

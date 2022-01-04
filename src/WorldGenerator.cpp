@@ -55,7 +55,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   createSettlements();
   createRoads();
 
-  //todo place trigger values on territories
+  // todo place trigger values on territories
 
   return true;
 }
@@ -253,9 +253,7 @@ bool WorldGenerator::consumeTerritoryType(TerritoryPool& territoryTypePool, Terr
 
 void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
 {
-  auto* territory = new Territory{ tile };
-  // todo set type in constructor
-  territory->setType(type);
+  auto* territory = new Territory{ tile, type };
   m_territories.emplace_back(territory);
   tile.setTileObject(m_territories.back());
 }
@@ -586,9 +584,7 @@ void WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
   }
   std::vector<std::reference_wrapper<Sector>> out;
   size_t nelems = harbourPool.size();
-  // todo use random engine to create sample
-  std::sample(
-      harbourSectors.begin(), harbourSectors.end(), std::back_inserter(out), nelems, std::mt19937{ std::random_device{}() });
+  std::sample(harbourSectors.begin(), harbourSectors.end(), std::back_inserter(out), nelems, m_randomEngine);
   for (auto sector : out)
   {
     std::uniform_int_distribution<int> uniform_dist(0, static_cast<int>(harbourPool.size()) - 1);
@@ -597,7 +593,6 @@ void WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
     auto effect = std::get<4>(entry);
     auto resource = std::get<5>(entry);
     harbourPool.erase(std::next(harbourPool.begin(), randomIndex));
-
     createHarbour(sector, effect, resource);
   }
 }
@@ -609,7 +604,7 @@ void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Harb
 }
 void WorldGenerator::removeSettlements()
 {
-  for (auto settlement : m_settlements)
+  for (auto* settlement : m_settlements)
   {
     delete settlement;
   }
@@ -617,7 +612,7 @@ void WorldGenerator::removeSettlements()
 }
 void WorldGenerator::removeRoads()
 {
-  for (auto road : m_roads)
+  for (auto* road : m_roads)
   {
     delete road;
   }
@@ -657,6 +652,7 @@ void WorldGenerator::createRoads()
       }
     }
   }
+  SPDLOG_INFO("placed {} roads", m_roads.size());
 }
 const std::vector<Territory*> WorldGenerator::getTerritories() const
 {
