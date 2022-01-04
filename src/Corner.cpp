@@ -62,3 +62,27 @@ void Corner::addSector(Sector& sector)
 {
   m_sectors.emplace_back(sector);
 }
+std::vector<std::reference_wrapper<Edge>>& Corner::getEdges()
+{
+  return m_edges;
+}
+std::vector<std::reference_wrapper<Tile>>& Corner::getTiles()
+{
+  return m_tiles;
+}
+std::vector<std::reference_wrapper<Sector>>& Corner::getSectors()
+{
+  return m_sectors;
+}
+void Corner::setCornerObject(ICornerObject* cornerObject)
+{
+  if(cornerObject == nullptr)
+  {
+    return;
+  }
+  m_cornerObject = cornerObject;
+}
+ICornerObject* Corner::getCornerObject()
+{
+  return m_cornerObject;
+}

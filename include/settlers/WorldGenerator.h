@@ -7,7 +7,9 @@
 #include "Corner.h"
 #include "Edge.h"
 #include "Harbour.h"
+#include "Road.h"
 #include "Sector.h"
+#include "Settlement.h"
 #include "Territory.h"
 #include "Tile.h"
 
@@ -25,6 +27,8 @@ class WorldGenerator
   std::map<int, Sector> m_sectorMap;
   std::vector<Territory*> m_territories;
   std::vector<Harbour*> m_harbours;
+  std::vector<Settlement*> m_settlements;
+  std::vector<Road*> m_roads;
 
  public:
   explicit WorldGenerator();
@@ -36,6 +40,10 @@ class WorldGenerator
   const std::map<int, Corner>& getCorners() const;
   const std::map<int, Edge>& getEdges() const;
   const std::map<int, Sector>& getSectors() const;
+  const std::vector<Territory*> getTerritories() const;
+  const std::vector<Harbour*> getHarbours() const;
+  const std::vector<Settlement*> getSettlements() const;
+  const std::vector<Road*> getRoads() const;
 
  private:
   bool readFile(const std::string& filePath);
@@ -44,9 +52,11 @@ class WorldGenerator
   void createSectors();
   bool createTerritories();
   bool createHarbours();
+  void createSettlements();
+  void createRoads();
   bool initHarbourPool(HarbourPool& harbourPool);
   bool createPredefinedHarbours(HarbourPool& harbourPool);
-  bool createRandomHarbours(HarbourPool& harbourPool);
+  void createRandomHarbours(HarbourPool& harbourPool);
   void createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource);
   bool initTerritoryPool(TerritoryPool& territoryPool);
   bool createPredefinedTerritories(TerritoryPool& territoryPool);
@@ -58,4 +68,8 @@ class WorldGenerator
   void linkCornersAndEdges();
   void linkTilesAndEdges();
   std::vector<std::reference_wrapper<Tile>> getNeighborTiles(const Tile& tile);
+  void removeHarbours();
+  void removeTerritories();
+  void removeSettlements();
+  void removeRoads();
 };

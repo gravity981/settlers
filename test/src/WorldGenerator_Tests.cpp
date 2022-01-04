@@ -30,6 +30,10 @@ TEST(WorldGeneratorTests, generateFromExistingFileShouldWork)
   EXPECT_EQ(fg.getCorners().size(), 12);
   EXPECT_EQ(fg.getEdges().size(), 10);
   EXPECT_EQ(fg.getSectors().size(), 20);
+  EXPECT_EQ(fg.getTerritories().size(), 7);
+  EXPECT_EQ(fg.getSettlements().size(), 6);
+  EXPECT_EQ(fg.getRoads().size(), 4);
+  EXPECT_EQ(fg.getHarbours().size(), 3);
 }
 
 TEST(WorldGeneratorTests, generateFromExistingFileOriginalShouldWork)
@@ -40,6 +44,10 @@ TEST(WorldGeneratorTests, generateFromExistingFileOriginalShouldWork)
   EXPECT_EQ(fg.getCorners().size(), 72);
   EXPECT_EQ(fg.getEdges().size(), 90);
   EXPECT_EQ(fg.getSectors().size(), 180);
+  EXPECT_EQ(fg.getTerritories().size(), 37);
+  EXPECT_EQ(fg.getSettlements().size(), 54);
+  EXPECT_EQ(fg.getRoads().size(), 72);
+  EXPECT_EQ(fg.getHarbours().size(), 0);
 }
 
 int main(int argc, char **argv)

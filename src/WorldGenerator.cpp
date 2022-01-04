@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <fstream>
 
-
 #include "settlers/Territory.h"
 
 WorldGenerator::WorldGenerator()
@@ -23,16 +22,10 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   m_tileMap.clear();
   m_cornerMap.clear();
   m_edgeMap.clear();
-  for (auto* territory : m_territories)
-  {
-    delete territory;
-  }
-  m_territories.clear();
-  for (auto* harbour : m_harbours)
-  {
-    delete harbour;
-  }
-  m_harbours.clear();
+  removeTerritories();
+  removeHarbours();
+  removeSettlements();
+  removeRoads();
   // read file
   if (!readFile(filePath))
   {
@@ -59,7 +52,28 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   {
     return false;
   }
+  createSettlements();
+  createRoads();
+
+  //todo place trigger values on territories
+
   return true;
+}
+void WorldGenerator::removeTerritories()
+{
+  for (auto* territory : m_territories)
+  {
+    delete territory;
+  }
+  m_territories.clear();
+}
+void WorldGenerator::removeHarbours()
+{
+  for (auto* harbour : m_harbours)
+  {
+    delete harbour;
+  }
+  m_harbours.clear();
 }
 
 bool WorldGenerator::readFile(const std::string& filePath)
@@ -175,7 +189,6 @@ bool WorldGenerator::createCoastTerritories(TerritoryPool& territoryPool)
 
 bool WorldGenerator::createRandomTerritories(TerritoryPool& territoryPool)
 {
-
   for (auto& [id, tile] : m_tileMap)
   {
     if (tile.getTileObject() == nullptr)
@@ -240,8 +253,8 @@ bool WorldGenerator::consumeTerritoryType(TerritoryPool& territoryTypePool, Terr
 
 void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
 {
-  auto territory = new Territory{ tile };
-  //todo set type in constructor
+  auto* territory = new Territory{ tile };
+  // todo set type in constructor
   territory->setType(type);
   m_territories.emplace_back(territory);
   tile.setTileObject(m_territories.back());
@@ -453,19 +466,16 @@ const std::map<int, Sector>& WorldGenerator::getSectors() const
 bool WorldGenerator::createHarbours()
 {
   HarbourPool harbourPool;
-  if(!initHarbourPool(harbourPool))
+  if (!initHarbourPool(harbourPool))
   {
     return false;
   }
   auto harbourPoolCount = harbourPool.size();
-  if(!createPredefinedHarbours(harbourPool))
+  if (!createPredefinedHarbours(harbourPool))
   {
     return false;
   }
-  if(!createRandomHarbours(harbourPool))
-  {
-    return false;
-  }
+  createRandomHarbours(harbourPool);
   if (!harbourPool.empty())
   {
     SPDLOG_ERROR("{} harbours could not be placed", harbourPool.size());
@@ -539,7 +549,7 @@ bool WorldGenerator::createPredefinedHarbours(HarbourPool& harbourPool)
       if (m_sectorMap.find(sectorId) != m_sectorMap.end())
       {
         auto sector = m_sectorMap.at(sectorId);
-        if(sector.getTile().getTileObject()->type() != ITileObject::TYPE_COAST ||
+        if (sector.getTile().getTileObject()->type() != ITileObject::TYPE_COAST ||
             sector.getOppositeTile()->getTileObject()->type() == ITileObject::TYPE_COAST)
         {
           SPDLOG_WARN("predefined harbour q: {}, r: {}, nr: {}, is placed on non-coast sector", q, r, nr);
@@ -561,7 +571,7 @@ bool WorldGenerator::createPredefinedHarbours(HarbourPool& harbourPool)
   return true;
 }
 
-bool WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
+void WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
 {
   std::vector<std::reference_wrapper<Sector>> harbourSectors;
   for (auto& [id, sector] : m_sectorMap)
@@ -574,16 +584,11 @@ bool WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
       }
     }
   }
-  //////
   std::vector<std::reference_wrapper<Sector>> out;
   size_t nelems = harbourPool.size();
+  // todo use random engine to create sample
   std::sample(
-      harbourSectors.begin(),
-      harbourSectors.end(),
-      std::back_inserter(out),
-      nelems,
-      std::mt19937{std::random_device{}()}
-  );
+      harbourSectors.begin(), harbourSectors.end(), std::back_inserter(out), nelems, std::mt19937{ std::random_device{}() });
   for (auto sector : out)
   {
     std::uniform_int_distribution<int> uniform_dist(0, static_cast<int>(harbourPool.size()) - 1);
@@ -593,16 +598,79 @@ bool WorldGenerator::createRandomHarbours(HarbourPool& harbourPool)
     auto resource = std::get<5>(entry);
     harbourPool.erase(std::next(harbourPool.begin(), randomIndex));
 
-    // place harbour here
-    auto harbour = new Harbour{ effect, resource };
-    sector.get().setSectorObject(harbour);
+    createHarbour(sector, effect, resource);
   }
-
-  return true;
 }
 void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Harbour::EResource resource)
 {
-  auto harbour = new Harbour(effect, resource);
+  auto* harbour = new Harbour(effect, resource);
   m_harbours.emplace_back(harbour);
   sector.setSectorObject(harbour);
+}
+void WorldGenerator::removeSettlements()
+{
+  for (auto settlement : m_settlements)
+  {
+    delete settlement;
+  }
+  m_settlements.clear();
+}
+void WorldGenerator::removeRoads()
+{
+  for (auto road : m_roads)
+  {
+    delete road;
+  }
+  m_roads.clear();
+}
+void WorldGenerator::createSettlements()
+{
+  for (auto& [id, corner] : m_cornerMap)
+  {
+    for (auto& tile : corner.getTiles())
+    {
+      // a settlement is placed on each corner which touches a non-coast territory
+      if (tile.get().getTileObject()->type() != ITileObject::TYPE_COAST)
+      {
+        auto* settlement = new Settlement;
+        m_settlements.emplace_back(settlement);
+        corner.setCornerObject(settlement);
+        break;
+      }
+    }
+  }
+  SPDLOG_INFO("placed {} settlements", m_settlements.size());
+}
+void WorldGenerator::createRoads()
+{
+  for (auto& [id, edge] : m_edgeMap)
+  {
+    for (auto& tile : edge.getTiles())
+    {
+      // create a road for each edge which touches non-coast territory
+      if (tile.get().getTileObject()->type() != ITileObject::TYPE_COAST)
+      {
+        auto* road = new Road;
+        m_roads.emplace_back(road);
+        edge.setEdgeObject(road);
+        break;
+      }
+    }
+  }
+}
+const std::vector<Territory*> WorldGenerator::getTerritories() const
+{
+  return m_territories;
+}
+const std::vector<Harbour*> WorldGenerator::getHarbours() const
+{
+  return m_harbours;
+}
+const std::vector<Settlement*> WorldGenerator::getSettlements() const
+{
+  return m_settlements;
+}
+const std::vector<Road*> WorldGenerator::getRoads() const
+{
+  return m_roads;
 }

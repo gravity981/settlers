@@ -55,3 +55,15 @@ std::vector<std::reference_wrapper<Tile>>& Edge::getTiles()
 {
   return m_tiles;
 }
+void Edge::setEdgeObject(IEdgeObject* edgeObject)
+{
+ if(edgeObject == nullptr)
+ {
+   return;
+ }
+ m_edgeObject = edgeObject;
+}
+IEdgeObject* Edge::getEdgeObject()
+{
+  return m_edgeObject;
+}

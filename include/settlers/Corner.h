@@ -31,9 +31,14 @@ class Corner
   double q() const;
   double r() const;
   int id() const;
+  std::vector<std::reference_wrapper<Edge>>& getEdges();
   void addEdge(Edge& edge);
+  std::vector<std::reference_wrapper<Tile>>& getTiles();
   void addTile(Tile& tile);
+  std::vector<std::reference_wrapper<Sector>>& getSectors();
   void addSector(Sector& sector);
+  void setCornerObject(ICornerObject* cornerObject);
+  ICornerObject* getCornerObject();
 
   static std::vector<Corner> getOverlappingCorners(const std::vector<Corner>& cornersA, const std::vector<Corner>& cornersB);
 };
