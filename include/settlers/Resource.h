@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 class Resource
 {
  public:
@@ -13,9 +15,25 @@ class Resource
     RESOURCE_UNDEFINED
   };
  private:
-  EResource m_resource;
-  int amount;
+  std::map<EResource, int> m_resourceMap;
  public:
   explicit Resource();
   virtual ~Resource();
+
+  int get(EResource resource) const;
+  void set(EResource resource, int value);
+
+  Resource& operator+=(const Resource& rhs);
+  Resource& operator-=(const Resource& rhs);
+  friend Resource operator+(Resource lhs, const Resource& rhs);
+  friend Resource operator-(Resource lhs, const Resource& rhs);
+  friend bool operator<(const Resource& lhs, const Resource& rhs);
+  friend bool operator>(const Resource& lhs, const Resource& rhs);
+  friend bool operator<=(const Resource& lhs, const Resource& rhs);
+  friend bool operator>=(const Resource& lhs, const Resource& rhs);
+
+ private:
+  void add(EResource resource, int value);
+  void subtract(EResource resource, int value);
+
 };
