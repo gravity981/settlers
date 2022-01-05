@@ -22,6 +22,5 @@ class Harbour : public ISectorObject
   explicit Harbour(EEffect effect, Resource::EResource resource);
   virtual ~Harbour();
 
-  static Resource::EResource strToResource(const std::string& resourceStr);
   static EEffect EffectFromString(const std::string& effectStr);
 };

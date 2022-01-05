@@ -506,7 +506,7 @@ bool WorldGenerator::initHarbourPool(HarbourPool& harbourPool)
       auto effectStr = obj["effect"].get<std::string>();
       auto resourceStr = obj["resource"].get<std::string>();
       auto effect = Harbour::EffectFromString(effectStr);
-      auto resource = Harbour::strToResource(resourceStr);
+      auto resource = Resource::strToResource(resourceStr);
       bool wellDefined = true;
       if (effect == Harbour::EFFECT_UNDEFINED)
       {

@@ -32,6 +32,8 @@ class Resource
   friend bool operator<=(const Resource& lhs, const Resource& rhs);
   friend bool operator>=(const Resource& lhs, const Resource& rhs);
 
+  static EResource strToResource(const std::string& resourceStr);
+
  private:
   void add(EResource resource, int value);
   void subtract(EResource resource, int value);

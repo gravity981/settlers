@@ -28,8 +28,7 @@ bool TradingCenter::initFromFile(const std::string& filePath)
       for(auto& costsObj : obj["cost"])
       {
         auto resourceStr = costsObj["resource"].get<std::string>();
-        //todo move ResourceFromString to Resource class
-        auto resourceType = Harbour::strToResource(resourceStr);
+        auto resourceType = Resource::strToResource(resourceStr);
         auto amount = costsObj["amount"].get<int>();
         resource.set(resourceType, amount);
       }

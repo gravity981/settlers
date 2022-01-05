@@ -1,5 +1,7 @@
 #include "settlers/Resource.h"
 
+#include <spdlog/spdlog.h>
+
 Resource::Resource()
 {
 }
@@ -32,7 +34,7 @@ void Resource::set(Resource::EResource resource, int value)
 Resource& Resource::operator+=(const Resource& rhs)
 {
   auto& lhs = *this;
-  for(auto& [resource, value] : rhs.m_resourceMap)
+  for (auto& [resource, value] : rhs.m_resourceMap)
   {
     lhs.add(resource, value);
   }
@@ -41,7 +43,7 @@ Resource& Resource::operator+=(const Resource& rhs)
 Resource& Resource::operator-=(const Resource& rhs)
 {
   auto& lhs = *this;
-  for(auto& [resource, value] : rhs.m_resourceMap)
+  for (auto& [resource, value] : rhs.m_resourceMap)
   {
     lhs.subtract(resource, value);
   }
@@ -60,7 +62,7 @@ Resource operator-(Resource lhs, const Resource& rhs)
 
 void Resource::add(Resource::EResource resource, int value)
 {
-  if(m_resourceMap.find(resource) == m_resourceMap.end())
+  if (m_resourceMap.find(resource) == m_resourceMap.end())
   {
     m_resourceMap.insert(std::make_pair(resource, value));
   }
@@ -71,7 +73,7 @@ void Resource::add(Resource::EResource resource, int value)
 }
 void Resource::subtract(Resource::EResource resource, int value)
 {
-  if(m_resourceMap.find(resource) == m_resourceMap.end())
+  if (m_resourceMap.find(resource) == m_resourceMap.end())
   {
     m_resourceMap.insert(std::make_pair(resource, -value));
   }
@@ -83,10 +85,10 @@ void Resource::subtract(Resource::EResource resource, int value)
 bool operator<(const Resource& lhs, const Resource& rhs)
 {
   bool smaller = true;
-  for(const auto& [resource, lhsVal] : lhs.m_resourceMap)
+  for (const auto& [resource, lhsVal] : lhs.m_resourceMap)
   {
     auto rhsVal = rhs.get(resource);
-    if(lhsVal >= rhsVal)
+    if (lhsVal >= rhsVal)
     {
       smaller = false;
       break;
@@ -105,4 +107,33 @@ bool operator<=(const Resource& lhs, const Resource& rhs)
 bool operator>=(const Resource& lhs, const Resource& rhs)
 {
   return !(lhs < rhs);
+}
+Resource::EResource Resource::strToResource(const std::string& resourceStr)
+{
+  if (resourceStr == "clay")
+  {
+    return RESOURCE_CLAY;
+  }
+  if (resourceStr == "sheep")
+  {
+    return RESOURCE_SHEEP;
+  }
+  if (resourceStr == "stone")
+  {
+    return RESOURCE_STONE;
+  }
+  if (resourceStr == "wheat")
+  {
+    return RESOURCE_WHEAT;
+  }
+  if (resourceStr == "wood")
+  {
+    return RESOURCE_WOOD;
+  }
+  if (resourceStr == "all")
+  {
+    return RESOURCE_ALL;
+  }
+  SPDLOG_WARN("resource \"{}\" is undefined", resourceStr);
+  return RESOURCE_UNDEFINED;
 }
