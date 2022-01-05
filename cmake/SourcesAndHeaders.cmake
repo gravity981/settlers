@@ -12,6 +12,8 @@ set(sources
 		src/TriggerEffectCollection.cpp
 		src/TradingCenter.cpp
 		src/Resource.cpp
+		src/JsonUtil.cpp
+		src/JsonUtil.h
 )
 
 set(exe_sources

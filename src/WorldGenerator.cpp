@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 
+#include "JsonUtil.h"
 #include "settlers/Territory.h"
 
 WorldGenerator::WorldGenerator()
@@ -27,7 +28,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
   removeSettlements();
   removeRoads();
   // read file
-  if (!readFile(filePath, m_jsonData))
+  if (!JsonUtil::readFile(filePath, m_jsonData))
   {
     return false;
   }
@@ -60,15 +61,15 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
 bool WorldGenerator::placeTriggerValues()
 {
   TriggerValuePool triggerValuePool;
-  if(!createTriggerEffectsAndinitTriggerValuePool(triggerValuePool))
+  if (!createTriggerEffectsAndinitTriggerValuePool(triggerValuePool))
   {
     return false;
   }
-  if(!placeTriggerValues(triggerValuePool))
+  if (!placeTriggerValues(triggerValuePool))
   {
     return false;
   }
-  if(!triggerValuePool.empty())
+  if (!triggerValuePool.empty())
   {
     SPDLOG_WARN("{} triggerValues could not be placed", triggerValuePool.size());
   }
@@ -89,33 +90,6 @@ void WorldGenerator::removeHarbours()
     delete harbour;
   }
   m_harbours.clear();
-}
-
-bool WorldGenerator::readFile(const std::string& filePath, nlohmann::json& jsonData)
-{
-  std::ifstream ifs;
-  ifs.open(filePath, std::ifstream::in);
-  if (ifs.fail())
-  {
-    SPDLOG_ERROR("failed to open file '{}'", filePath);
-    return false;
-  }
-  bool success = false;
-  try
-  {
-    ifs >> jsonData;
-    success = true;
-  }
-  catch (nlohmann::json::parse_error& ex)
-  {
-    SPDLOG_ERROR("parse error at byte {}", ex.byte);
-  }
-  ifs.close();
-  if (success)
-  {
-    SPDLOG_INFO("parsed json file '{}'", filePath);
-  }
-  return success;
 }
 
 bool WorldGenerator::createTiles()
@@ -716,16 +690,16 @@ bool WorldGenerator::createTriggerEffectsAndinitTriggerValuePool(TriggerValuePoo
 bool WorldGenerator::placeTriggerValues(TriggerValuePool& triggerValuePool)
 {
   auto triggerValueCount = triggerValuePool.size();
-  for(auto* territory : m_territories)
+  for (auto* territory : m_territories)
   {
-    if(territory->type() == ITileObject::TYPE_COAST || territory->type() == ITileObject::TYPE_DESERT)
+    if (territory->type() == ITileObject::TYPE_COAST || territory->type() == ITileObject::TYPE_DESERT)
     {
-      //skip territories which cannot be triggered
+      // skip territories which cannot be triggered
       continue;
     }
     else
     {
-      if(triggerValuePool.empty())
+      if (triggerValuePool.empty())
       {
         SPDLOG_ERROR("triggerValuePool starved");
         return false;

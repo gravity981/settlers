@@ -1,7 +1,10 @@
-#include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 #include "settlers/TradingCenter.h"
-#include "settlers/WorldGenerator.h"
+
+#include <spdlog/spdlog.h>
+
+#include <nlohmann/json.hpp>
+
+#include "JsonUtil.h"
 
 TradingCenter::TradingCenter()
 {
@@ -13,8 +16,7 @@ TradingCenter::~TradingCenter()
 bool TradingCenter::initFromFile(const std::string& filePath)
 {
   nlohmann::json jsonData;
-  //todo move readFile function to some json helper class
-  if(!WorldGenerator::readFile(filePath, jsonData))
+  if (!JsonUtil::readFile(filePath, jsonData))
   {
     return false;
   }
@@ -25,7 +27,7 @@ bool TradingCenter::initFromFile(const std::string& filePath)
       auto objectStr = obj["object"].get<std::string>();
       auto object = strToBuyableObject(objectStr);
       Resource resource;
-      for(auto& costsObj : obj["cost"])
+      for (auto& costsObj : obj["cost"])
       {
         auto resourceStr = costsObj["resource"].get<std::string>();
         auto resourceType = Resource::strToResource(resourceStr);
@@ -44,19 +46,19 @@ bool TradingCenter::initFromFile(const std::string& filePath)
 }
 TradingCenter::EBuyableObject TradingCenter::strToBuyableObject(const std::string& buyableObjectStr)
 {
-  if(buyableObjectStr == "road")
+  if (buyableObjectStr == "road")
   {
     return BUYABLEOBJECT_ROAD;
   }
-  if(buyableObjectStr == "village")
+  if (buyableObjectStr == "village")
   {
     return BUYABLEOBJECT_VILLAGE;
   }
-  if(buyableObjectStr == "city")
+  if (buyableObjectStr == "city")
   {
     return BUYABLEOBJECT_CITY;
   }
-  if(buyableObjectStr == "development")
+  if (buyableObjectStr == "development")
   {
     return BUYABLEOBJECT_DEVELOPMENT;
   }
@@ -65,7 +67,7 @@ TradingCenter::EBuyableObject TradingCenter::strToBuyableObject(const std::strin
 }
 Resource TradingCenter::getCostOf(EBuyableObject object) const
 {
-  if(m_buildingCosts.find(object) == m_buildingCosts.end())
+  if (m_buildingCosts.find(object) == m_buildingCosts.end())
   {
     SPDLOG_WARN("there is no cost registered for object \"{}\"", object);
     return Resource{};

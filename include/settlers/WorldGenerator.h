@@ -50,8 +50,6 @@ class WorldGenerator
   const std::vector<Road*> getRoads() const;
   const TriggerEffectCollection getTriggerEffectCollection() const;
 
-  static bool readFile(const std::string& filePath, nlohmann::json& jsonData);
-
  private:
   bool createTiles();
   void createCornersAndEdges();
