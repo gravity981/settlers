@@ -22,19 +22,18 @@ bool TradingCenter::initFromFile(const std::string& filePath)
   {
     for (auto& obj : jsonData)
     {
-      auto typeStr = obj["type"].get<std::string>();
-      //todo EBuyableObject from typeString
+      auto objectStr = obj["object"].get<std::string>();
+      auto object = strToBuyableObject(objectStr);
       Resource resource;
       for(auto& costsObj : obj["cost"])
       {
         auto resourceStr = costsObj["resource"].get<std::string>();
         //todo move ResourceFromString to Resource class
-        auto resourceType = Harbour::ResourceFromString(resourceStr);
+        auto resourceType = Harbour::strToResource(resourceStr);
         auto amount = costsObj["amount"].get<int>();
         resource.set(resourceType, amount);
       }
-      //todo use correct object
-      m_buildingCosts.insert(std::make_pair(BUYABLEOBJECT_ROAD, resource));
+      m_buildingCosts.insert(std::make_pair(object, resource));
     }
   }
   catch (nlohmann::json::type_error& ex)
@@ -43,4 +42,37 @@ bool TradingCenter::initFromFile(const std::string& filePath)
     return false;
   }
   return true;
+}
+TradingCenter::EBuyableObject TradingCenter::strToBuyableObject(const std::string& buyableObjectStr)
+{
+  if(buyableObjectStr == "road")
+  {
+    return BUYABLEOBJECT_ROAD;
+  }
+  if(buyableObjectStr == "village")
+  {
+    return BUYABLEOBJECT_VILLAGE;
+  }
+  if(buyableObjectStr == "city")
+  {
+    return BUYABLEOBJECT_CITY;
+  }
+  if(buyableObjectStr == "development")
+  {
+    return BUYABLEOBJECT_DEVELOPMENT;
+  }
+  SPDLOG_WARN("buyableObject \"{}\" is undefined", buyableObjectStr);
+  return BUYABLEOBJECT_UNDEFINED;
+}
+Resource TradingCenter::getCostOf(EBuyableObject object) const
+{
+  if(m_buildingCosts.find(object) == m_buildingCosts.end())
+  {
+    SPDLOG_WARN("there is no cost registered for object \"{}\"", object);
+    return Resource{};
+  }
+  else
+  {
+    return m_buildingCosts.at(object);
+  }
 }

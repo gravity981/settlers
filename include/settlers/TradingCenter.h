@@ -14,6 +14,7 @@ class TradingCenter
     BUYABLEOBJECT_VILLAGE,
     BUYABLEOBJECT_CITY,
     BUYABLEOBJECT_DEVELOPMENT,
+    BUYABLEOBJECT_UNDEFINED
   };
 
  private:
@@ -24,4 +25,7 @@ class TradingCenter
   virtual ~TradingCenter();
 
   bool initFromFile(const std::string& filePath);
+  Resource getCostOf(EBuyableObject object) const;
+
+  static EBuyableObject strToBuyableObject(const std::string& buyableObjectStr);
 };

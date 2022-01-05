@@ -1,6 +1,6 @@
 [
   {
-    "type": "road",
+    "object": "road",
     "cost": [
       {
         "resource": "wood",
@@ -13,7 +13,7 @@
     ]
   },
   {
-    "type": "village",
+    "object": "village",
     "cost": [
       {
         "resource": "wood",
@@ -34,7 +34,7 @@
     ]
   },
   {
-    "type": "city",
+    "object": "city",
     "cost": [
       {
         "resource": "wheat",
@@ -47,7 +47,7 @@
     ]
   },
   {
-    "type": "development",
+    "object": "development",
     "cost": [
       {
         "resource": "wheat",

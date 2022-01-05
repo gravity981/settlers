@@ -10,7 +10,7 @@ Harbour::~Harbour()
 {
 }
 
-Resource::EResource Harbour::ResourceFromString(const std::string& resourceStr)
+Resource::EResource Harbour::strToResource(const std::string& resourceStr)
 {
   if (resourceStr == "clay")
   {
