@@ -1,4 +1,4 @@
-#include "settlers/WorldGenerator.h"
+#include "settlers/World.h"
 
 #include <spdlog/spdlog.h>
 
@@ -8,15 +8,15 @@
 #include "JsonUtil.h"
 #include "settlers/Territory.h"
 
-WorldGenerator::WorldGenerator()
+World::World()
 {
 }
 
-WorldGenerator::~WorldGenerator()
+World::~World()
 {
 }
 
-bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long seed)
+bool World::generateFromFile(const std::string& filePath, unsigned long seed)
 {
   m_randomEngine.seed(seed);
   m_jsonData.clear();
@@ -58,7 +58,7 @@ bool WorldGenerator::generateFromFile(const std::string& filePath, unsigned long
 
   return placeTriggerValues();
 }
-bool WorldGenerator::placeTriggerValues()
+bool World::placeTriggerValues()
 {
   TriggerValuePool triggerValuePool;
   if (!createTriggerEffectsAndinitTriggerValuePool(triggerValuePool))
@@ -75,7 +75,7 @@ bool WorldGenerator::placeTriggerValues()
   }
   return true;
 }
-void WorldGenerator::removeTerritories()
+void World::removeTerritories()
 {
   for (auto* territory : m_territories)
   {
@@ -83,7 +83,7 @@ void WorldGenerator::removeTerritories()
   }
   m_territories.clear();
 }
-void WorldGenerator::removeHarbours()
+void World::removeHarbours()
 {
   for (auto* harbour : m_harbours)
   {
@@ -92,7 +92,7 @@ void WorldGenerator::removeHarbours()
   m_harbours.clear();
 }
 
-bool WorldGenerator::createTiles()
+bool World::createTiles()
 {
   bool success = true;
   try
@@ -126,7 +126,7 @@ bool WorldGenerator::createTiles()
   return success;
 }
 
-bool WorldGenerator::placeTerritories()
+bool World::placeTerritories()
 {
   TerritoryPool territoryPool;
   if (!initTerritoryPool(territoryPool))
@@ -155,7 +155,7 @@ bool WorldGenerator::placeTerritories()
   return true;
 }
 
-bool WorldGenerator::placeCoastTerritories(TerritoryPool& territoryPool)
+bool World::placeCoastTerritories(TerritoryPool& territoryPool)
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -176,7 +176,7 @@ bool WorldGenerator::placeCoastTerritories(TerritoryPool& territoryPool)
   return true;
 }
 
-bool WorldGenerator::placeRandomTerritories(TerritoryPool& territoryPool)
+bool World::placeRandomTerritories(TerritoryPool& territoryPool)
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -198,7 +198,7 @@ bool WorldGenerator::placeRandomTerritories(TerritoryPool& territoryPool)
   return true;
 }
 
-bool WorldGenerator::placePredefinedTerritories(TerritoryPool& territoryPool)
+bool World::placePredefinedTerritories(TerritoryPool& territoryPool)
 {
   for (auto it = territoryPool.begin(); it != territoryPool.end();)
   {
@@ -226,7 +226,7 @@ bool WorldGenerator::placePredefinedTerritories(TerritoryPool& territoryPool)
   return true;
 }
 
-bool WorldGenerator::consumeTerritory(TerritoryPool& territoryPool, Territory::EType type)
+bool World::consumeTerritory(TerritoryPool& territoryPool, Territory::EType type)
 {
   for (auto it = territoryPool.begin(); it != territoryPool.end(); it++)
   {
@@ -240,14 +240,14 @@ bool WorldGenerator::consumeTerritory(TerritoryPool& territoryPool, Territory::E
   return false;
 }
 
-void WorldGenerator::createTerritory(Tile& tile, Territory::EType type)
+void World::createTerritory(Tile& tile, Territory::EType type)
 {
   auto* territory = new Territory{ tile, type };
   m_territories.emplace_back(territory);
   tile.setTileObject(m_territories.back());
 }
 
-bool WorldGenerator::initTerritoryPool(TerritoryPool& territoryPool)
+bool World::initTerritoryPool(TerritoryPool& territoryPool)
 {
   try
   {
@@ -284,7 +284,7 @@ bool WorldGenerator::initTerritoryPool(TerritoryPool& territoryPool)
   return true;
 }
 
-void WorldGenerator::createCornersAndEdges()
+void World::createCornersAndEdges()
 {
   // loop through all tiles
   for (auto& [id, tile] : m_tileMap)
@@ -335,7 +335,7 @@ void WorldGenerator::createCornersAndEdges()
   SPDLOG_INFO("generated {} edges", m_edgeMap.size());
 }
 
-void WorldGenerator::linkTilesAndCorners()
+void World::linkTilesAndCorners()
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -352,7 +352,7 @@ void WorldGenerator::linkTilesAndCorners()
   }
 }
 
-void WorldGenerator::linkCornersAndEdges()
+void World::linkCornersAndEdges()
 {
   // edges know their corners already after creation, so simply iterate over corners of edges
   for (auto& [edgeId, edge] : m_edgeMap)
@@ -364,7 +364,7 @@ void WorldGenerator::linkCornersAndEdges()
   }
 }
 
-void WorldGenerator::linkTilesAndEdges()
+void World::linkTilesAndEdges()
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -383,21 +383,21 @@ void WorldGenerator::linkTilesAndEdges()
   }
 }
 
-const std::map<int, Tile>& WorldGenerator::getTiles() const
+const std::map<int, Tile>& World::getTiles() const
 {
   return m_tileMap;
 }
 
-const std::map<int, Corner>& WorldGenerator::getCorners() const
+const std::map<int, Corner>& World::getCorners() const
 {
   return m_cornerMap;
 }
 
-const std::map<int, Edge>& WorldGenerator::getEdges() const
+const std::map<int, Edge>& World::getEdges() const
 {
   return m_edgeMap;
 }
-std::vector<std::reference_wrapper<Tile>> WorldGenerator::getNeighborTiles(const Tile& tile)
+std::vector<std::reference_wrapper<Tile>> World::getNeighborTiles(const Tile& tile)
 {
   std::vector<std::reference_wrapper<Tile>> neighbors;
   for (auto& possibleNeighbor : tile.getAllPossibleNeighbors())
@@ -409,7 +409,7 @@ std::vector<std::reference_wrapper<Tile>> WorldGenerator::getNeighborTiles(const
   }
   return neighbors;
 }
-void WorldGenerator::createSectors()
+void World::createSectors()
 {
   for (auto& [id, tile] : m_tileMap)
   {
@@ -446,11 +446,11 @@ void WorldGenerator::createSectors()
   }
   SPDLOG_INFO("generated {} sectors", m_sectorMap.size());
 }
-const std::map<int, Sector>& WorldGenerator::getSectors() const
+const std::map<int, Sector>& World::getSectors() const
 {
   return m_sectorMap;
 }
-bool WorldGenerator::placeHarbours()
+bool World::placeHarbours()
 {
   HarbourPool harbourPool;
   if (!initHarbourPool(harbourPool))
@@ -471,7 +471,7 @@ bool WorldGenerator::placeHarbours()
   SPDLOG_INFO("placed {} harbours", harbourPoolCount);
   return true;
 }
-bool WorldGenerator::initHarbourPool(HarbourPool& harbourPool)
+bool World::initHarbourPool(HarbourPool& harbourPool)
 {
   try
   {
@@ -519,7 +519,7 @@ bool WorldGenerator::initHarbourPool(HarbourPool& harbourPool)
   }
   return true;
 }
-bool WorldGenerator::placePredefinedHarbours(HarbourPool& harbourPool)
+bool World::placePredefinedHarbours(HarbourPool& harbourPool)
 {
   for (auto it = harbourPool.begin(); it != harbourPool.end();)
   {
@@ -558,7 +558,7 @@ bool WorldGenerator::placePredefinedHarbours(HarbourPool& harbourPool)
   return true;
 }
 
-void WorldGenerator::placeRandomHarbours(HarbourPool& harbourPool)
+void World::placeRandomHarbours(HarbourPool& harbourPool)
 {
   std::vector<std::reference_wrapper<Sector>> harbourSectors;
   for (auto& [id, sector] : m_sectorMap)
@@ -585,13 +585,13 @@ void WorldGenerator::placeRandomHarbours(HarbourPool& harbourPool)
     createHarbour(sector, effect, resource);
   }
 }
-void WorldGenerator::createHarbour(Sector& sector, Harbour::EEffect effect, Resource::EResource resource)
+void World::createHarbour(Sector& sector, Harbour::EEffect effect, Resource::EResource resource)
 {
   auto* harbour = new Harbour(effect, resource);
   m_harbours.emplace_back(harbour);
   sector.setSectorObject(harbour);
 }
-void WorldGenerator::removeSettlements()
+void World::removeSettlements()
 {
   for (auto* settlement : m_settlements)
   {
@@ -599,7 +599,7 @@ void WorldGenerator::removeSettlements()
   }
   m_settlements.clear();
 }
-void WorldGenerator::removeRoads()
+void World::removeRoads()
 {
   for (auto* road : m_roads)
   {
@@ -607,7 +607,7 @@ void WorldGenerator::removeRoads()
   }
   m_roads.clear();
 }
-void WorldGenerator::placeSettlements()
+void World::placeSettlements()
 {
   for (auto& [id, corner] : m_cornerMap)
   {
@@ -625,7 +625,7 @@ void WorldGenerator::placeSettlements()
   }
   SPDLOG_INFO("placed {} settlements", m_settlements.size());
 }
-void WorldGenerator::placeRoads()
+void World::placeRoads()
 {
   for (auto& [id, edge] : m_edgeMap)
   {
@@ -643,23 +643,23 @@ void WorldGenerator::placeRoads()
   }
   SPDLOG_INFO("placed {} roads", m_roads.size());
 }
-const std::vector<Territory*> WorldGenerator::getTerritories() const
+const std::vector<Territory*> World::getTerritories() const
 {
   return m_territories;
 }
-const std::vector<Harbour*> WorldGenerator::getHarbours() const
+const std::vector<Harbour*> World::getHarbours() const
 {
   return m_harbours;
 }
-const std::vector<Settlement*> WorldGenerator::getSettlements() const
+const std::vector<Settlement*> World::getSettlements() const
 {
   return m_settlements;
 }
-const std::vector<Road*> WorldGenerator::getRoads() const
+const std::vector<Road*> World::getRoads() const
 {
   return m_roads;
 }
-bool WorldGenerator::createTriggerEffectsAndinitTriggerValuePool(TriggerValuePool& triggerValuePool)
+bool World::createTriggerEffectsAndinitTriggerValuePool(TriggerValuePool& triggerValuePool)
 {
   try
   {
@@ -687,7 +687,7 @@ bool WorldGenerator::createTriggerEffectsAndinitTriggerValuePool(TriggerValuePoo
   }
   return true;
 }
-bool WorldGenerator::placeTriggerValues(TriggerValuePool& triggerValuePool)
+bool World::placeTriggerValues(TriggerValuePool& triggerValuePool)
 {
   auto triggerValueCount = triggerValuePool.size();
   for (auto* territory : m_territories)
@@ -716,7 +716,7 @@ bool WorldGenerator::placeTriggerValues(TriggerValuePool& triggerValuePool)
   SPDLOG_INFO("placed {} trigger values on territories", triggerValueCount - triggerValuePool.size());
   return true;
 }
-const TriggerEffectCollection WorldGenerator::getTriggerEffectCollection() const
+const TriggerEffectCollection World::getTriggerEffectCollection() const
 {
   return m_triggerEffectCollection;
 }

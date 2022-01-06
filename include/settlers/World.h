@@ -19,7 +19,7 @@ using TerritoryPool = std::vector<std::tuple<bool, int, int, ITileObject::EType>
 using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Resource::EResource>>;
 using TriggerValuePool = std::vector<std::tuple<int>>;
 
-class WorldGenerator : public IWorld
+class World : public IWorld
 {
  private:
   std::default_random_engine m_randomEngine;
@@ -36,8 +36,8 @@ class WorldGenerator : public IWorld
   TriggerEffectCollection m_triggerEffectCollection;
 
  public:
-  explicit WorldGenerator();
-  virtual ~WorldGenerator();
+  explicit World();
+  virtual ~World();
 
   bool generateFromFile(const std::string& filePath, unsigned long seed);
 
