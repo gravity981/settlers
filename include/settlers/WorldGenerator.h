@@ -7,6 +7,7 @@
 #include "Corner.h"
 #include "Edge.h"
 #include "Harbour.h"
+#include "IWorld.h"
 #include "Road.h"
 #include "Sector.h"
 #include "Settlement.h"
@@ -18,7 +19,7 @@ using TerritoryPool = std::vector<std::tuple<bool, int, int, ITileObject::EType>
 using HarbourPool = std::vector<std::tuple<bool, int, int, int, Harbour::EEffect, Resource::EResource>>;
 using TriggerValuePool = std::vector<std::tuple<int>>;
 
-class WorldGenerator
+class WorldGenerator : public IWorld
 {
  private:
   std::default_random_engine m_randomEngine;

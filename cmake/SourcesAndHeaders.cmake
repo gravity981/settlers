@@ -14,6 +14,7 @@ set(sources
 		src/Resource.cpp
 		src/JsonUtil.cpp
 		src/JsonUtil.h
+		src/Game.cpp
 )
 
 set(exe_sources
@@ -39,13 +40,22 @@ set(headers
 		include/settlers/ISectorObject.h
 		include/settlers/TradingCenter.h
 		include/settlers/Resource.h
+		include/settlers/Game.h
+		include/settlers/IWorld.h
+		include/settlers/IGameObserver.h
 )
 
 set(test_sources
+		src/mock/MockWorld.h
+		src/mock/MockGameObserver.h
+)
+
+set(test_exe_sources
 		src/WorldGenerator_Tests.cpp
 		src/Corner_Tests.cpp
 		src/DiceRoller_Tests.cpp
 		src/Tile_Tests.cpp
 		src/TradingCenter_Tests.cpp
 		src/Resource_Tests.cpp
-)
+		src/Game_Tests.cpp
+		)
