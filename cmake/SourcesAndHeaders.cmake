@@ -1,20 +1,20 @@
 set(sources
-		src/World.cpp
-		src/Tile.cpp
-		src/Corner.cpp
-		src/Edge.cpp
-		src/Road.cpp
-		src/Settlement.cpp
-		src/Territory.cpp
-		src/DiceRoller.cpp
-		src/Sector.cpp
-		src/Harbour.cpp
-		src/TriggerEffectCollection.cpp
-		src/TradingCenter.cpp
-		src/Resource.cpp
-		src/JsonUtil.cpp
-		src/JsonUtil.h
-		src/Game.cpp
+		src/settlers/World.cpp
+		src/settlers/Tile.cpp
+		src/settlers/Corner.cpp
+		src/settlers/Edge.cpp
+		src/settlers/Road.cpp
+		src/settlers/Settlement.cpp
+		src/settlers/Territory.cpp
+		src/settlers/DiceRoller.cpp
+		src/settlers/Sector.cpp
+		src/settlers/Harbour.cpp
+		src/settlers/TriggerEffectCollection.cpp
+		src/settlers/TradingCenter.cpp
+		src/settlers/Resource.cpp
+		src/settlers/JsonUtil.cpp
+		src/settlers/JsonUtil.h
+		src/settlers/Game.cpp
 )
 
 set(exe_sources
