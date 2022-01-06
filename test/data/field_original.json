@@ -89,11 +89,6 @@
       "amount": 1
     }
   ],
-  "randomizer": {
-    "summands": 2,
-    "min": 1,
-    "max": 6
-  },
   "tiles": [
     {
       "q": 0,

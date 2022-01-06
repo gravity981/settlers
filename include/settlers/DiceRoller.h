@@ -14,6 +14,10 @@ class DiceRoller
   DiceRoller(int numberOfDices, int min, int max, unsigned long seed);
   virtual ~DiceRoller();
 
+  bool initFromFile(const std::string& filePath);
+
+  void setSeed(unsigned long seed);
+
   int possibleCombinationsForValue(int value) const;
 
   int roll();

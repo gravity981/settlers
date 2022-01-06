@@ -15,12 +15,13 @@ set(sources
 		src/settlers/JsonUtil.cpp
 		src/settlers/JsonUtil.h
 		src/settlers/Game.cpp
+		src/settlers/Player.cpp
 )
 
 set(exe_sources
 		src/consoleApp/main.cpp
 )
-#${sources}
+
 set(headers
 		include/settlers/World.h
 		include/settlers/Tile.h
@@ -42,6 +43,7 @@ set(headers
 		include/settlers/Game.h
 		include/settlers/IWorld.h
 		include/settlers/IGameObserver.h
+		include/settlers/Player.h
 )
 
 set(test_sources

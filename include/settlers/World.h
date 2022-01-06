@@ -39,7 +39,7 @@ class World : public IWorld
   explicit World();
   virtual ~World();
 
-  bool generateFromFile(const std::string& filePath, unsigned long seed);
+  bool generateFromFile(const std::string& filePath, unsigned long seed) override;
 
   const std::map<int, Tile>& getTiles() const;
   const std::map<int, Corner>& getCorners() const;
