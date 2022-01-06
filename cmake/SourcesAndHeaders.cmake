@@ -18,10 +18,9 @@ set(sources
 )
 
 set(exe_sources
-		src/main.cpp
-		${sources}
+		src/consoleApp/main.cpp
 )
-
+#${sources}
 set(headers
 		include/settlers/World.h
 		include/settlers/Tile.h
